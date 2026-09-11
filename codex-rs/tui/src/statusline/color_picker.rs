@@ -5,6 +5,8 @@
 
 use super::style::AnsiColor;
 
+mod render;
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub(super) enum ColorPickerMode {
     Basic16,
