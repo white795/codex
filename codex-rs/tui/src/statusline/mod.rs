@@ -8,6 +8,7 @@
 
 mod color_picker;
 mod config;
+mod editor;
 mod icon_selector;
 mod name_input;
 mod renderer;
