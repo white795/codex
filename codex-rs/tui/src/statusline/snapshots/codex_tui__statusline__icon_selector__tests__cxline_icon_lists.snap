@@ -1,0 +1,92 @@
+---
+source: tui/src/statusline/icon_selector_tests.rs
+expression: buffers
+---
+[
+    Buffer {
+        area: Rect { x: 0, y: 0, width: 80, height: 32 },
+        content: [
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                  ┌Icon Selector─────────────────────────────┐                  ",
+            "                  │┌Style───────────────────────────────────┐│                  ",
+            "                  ││[•] Emoji  [ ] Nerd Font                ││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  │┌Emoji Icons─────────────────────────────┐│                  ",
+            "                  ││🌱 Seedling                             ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││🔧 Wrench                               ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││⚡ Lightning                            ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││⭐ Star                                 ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││✨ Sparkles                             ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││🔥 Fire                                 ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││💎 Gem                                  ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││✓ Check                                 ││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  │┌Custom──────────────────────────────────┐│                  ",
+            "                  ││[c] to enter custom icon                ││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  │┌────────────────────────────────────────┐│                  ",
+            "                  ││[Enter] Select  [Tab] Switch  [c] Custom││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  └──────────────────────────────────────────┘                  ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+        ],
+        styles: [
+            x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 20, y: 14, fg: Reset, bg: Reset, underline: Reset, modifier: REVERSED,
+            x: 21, y: 14, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 22, y: 14, fg: Reset, bg: Reset, underline: Reset, modifier: REVERSED,
+            x: 31, y: 14, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        ]
+    },
+    Buffer {
+        area: Rect { x: 0, y: 0, width: 80, height: 32 },
+        content: [
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                  ┌Icon Selector─────────────────────────────┐                  ",
+            "                  │┌Style───────────────────────────────────┐│                  ",
+            "                  ││[ ] Emoji  [•] Nerd Font                ││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  │┌Nerd Font Icons─────────────────────────┐│                  ",
+            "                  ││ Chart                                 ││                  ",
+            "                  ││ List                                  ││                  ",
+            "                  ││ Cog                                   ││                  ",
+            "                  ││ Home                                  ││                  ",
+            "                  ││ Lightning                             ││                  ",
+            "                  ││ Code                                  ││                  ",
+            "                  ││ Code Fork                             ││                  ",
+            "                  ││ Clock                                 ││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  │┌Custom──────────────────────────────────┐│                  ",
+            "                  ││[c] to enter custom icon                ││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  │┌────────────────────────────────────────┐│                  ",
+            "                  ││[Enter] Select  [Tab] Switch  [c] Custom││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  └──────────────────────────────────────────┘                  ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+        ],
+        styles: [
+            x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 20, y: 14, fg: Reset, bg: Reset, underline: Reset, modifier: REVERSED,
+            x: 31, y: 14, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        ]
+    },
+]
