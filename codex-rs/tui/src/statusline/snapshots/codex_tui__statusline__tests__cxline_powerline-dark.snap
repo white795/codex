@@ -1,0 +1,77 @@
+---
+source: tui/src/statusline/foundation_tests.rs
+expression: "(line, buffers)"
+---
+(
+    Line::from_iter([
+        Span::from(" ").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(45, 45, 45)),
+        Span::from("\u{e26d} ").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(45, 45, 45)),
+        Span::from("GPT 5.2 Codex ·med").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(45, 45, 45)),
+        Span::from(" ").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(45, 45, 45)),
+        Span::from("\u{e0b0}").fg(Color::Rgb(45, 45, 45)).bg(Color::Rgb(139, 69, 19)),
+        Span::from(" ").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(139, 69, 19)),
+        Span::from("\u{f024b} ").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(139, 69, 19)),
+        Span::from("codex").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(139, 69, 19)),
+        Span::from(" ").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(139, 69, 19)),
+        Span::from("\u{e0b0}").fg(Color::Rgb(139, 69, 19)).bg(Color::Rgb(64, 64, 64)),
+        Span::from(" ").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(64, 64, 64)),
+        Span::from("\u{f02a2} ").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(64, 64, 64)),
+        Span::from("main").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(64, 64, 64)),
+        Span::from(" ✓ ↑2 ↓1").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(64, 64, 64)),
+        Span::from(" ").fg(Color::Rgb(255, 255, 255)).bg(Color::Rgb(64, 64, 64)),
+        Span::from("\u{e0b0}").fg(Color::Rgb(64, 64, 64)).bg(Color::Rgb(55, 65, 81)),
+        Span::from(" ").fg(Color::Rgb(209, 213, 219)).bg(Color::Rgb(55, 65, 81)),
+        Span::from("\u{f49b} ").fg(Color::Rgb(209, 213, 219)).bg(Color::Rgb(55, 65, 81)),
+        Span::from("39% · 50.0k tokens").fg(Color::Rgb(209, 213, 219)).bg(Color::Rgb(55, 65, 81)),
+        Span::from(" ").fg(Color::Rgb(209, 213, 219)).bg(Color::Rgb(55, 65, 81)),
+        Span::from("\u{e0b0}").fg(Color::Rgb(55, 65, 81)).bg(Color::Rgb(45, 50, 59)),
+        Span::from(" ").fg(Color::Rgb(209, 213, 219)).bg(Color::Rgb(45, 50, 59)),
+        Span::from("\u{f0a9f} ").fg(Color::Rgb(209, 213, 219)).bg(Color::Rgb(45, 50, 59)),
+        Span::from("25%").fg(Color::Rgb(209, 213, 219)).bg(Color::Rgb(45, 50, 59)),
+        Span::from(" · 1-28-14").fg(Color::Rgb(209, 213, 219)).bg(Color::Rgb(45, 50, 59)),
+        Span::from(" ").fg(Color::Rgb(209, 213, 219)).bg(Color::Rgb(45, 50, 59)),
+    ]),
+    [
+        Buffer {
+            area: Rect { x: 0, y: 0, width: 120, height: 1 },
+            content: [
+                "  GPT 5.2 Codex ·med  󰉋 codex  󰊢 main ✓ ↑2 ↓1   39% · 50.0k tokens  󰪟 25% · 1-28-14                               ",
+            ],
+            styles: [
+                x: 0, y: 0, fg: Rgb(255, 255, 255), bg: Rgb(45, 45, 45), underline: Reset, modifier: NONE,
+                x: 22, y: 0, fg: Rgb(45, 45, 45), bg: Rgb(139, 69, 19), underline: Reset, modifier: NONE,
+                x: 23, y: 0, fg: Rgb(255, 255, 255), bg: Rgb(139, 69, 19), underline: Reset, modifier: NONE,
+                x: 32, y: 0, fg: Rgb(139, 69, 19), bg: Rgb(64, 64, 64), underline: Reset, modifier: NONE,
+                x: 33, y: 0, fg: Rgb(255, 255, 255), bg: Rgb(64, 64, 64), underline: Reset, modifier: NONE,
+                x: 49, y: 0, fg: Rgb(64, 64, 64), bg: Rgb(55, 65, 81), underline: Reset, modifier: NONE,
+                x: 50, y: 0, fg: Rgb(209, 213, 219), bg: Rgb(55, 65, 81), underline: Reset, modifier: NONE,
+                x: 72, y: 0, fg: Rgb(55, 65, 81), bg: Rgb(45, 50, 59), underline: Reset, modifier: NONE,
+                x: 73, y: 0, fg: Rgb(209, 213, 219), bg: Rgb(45, 50, 59), underline: Reset, modifier: NONE,
+                x: 90, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            ]
+        },
+        Buffer {
+            area: Rect { x: 0, y: 0, width: 24, height: 1 },
+            content: [
+                "  GPT 5.2 Codex ·med  ",
+            ],
+            styles: [
+                x: 0, y: 0, fg: Rgb(255, 255, 255), bg: Rgb(45, 45, 45), underline: Reset, modifier: NONE,
+                x: 22, y: 0, fg: Rgb(45, 45, 45), bg: Rgb(139, 69, 19), underline: Reset, modifier: NONE,
+                x: 23, y: 0, fg: Rgb(255, 255, 255), bg: Rgb(139, 69, 19), underline: Reset, modifier: NONE,
+            ]
+        },
+        Buffer {
+            area: Rect { x: 0, y: 0, width: 1, height: 1 },
+            content: [
+                " ",
+            ],
+            styles: [
+                x: 0, y: 0, fg: Rgb(255, 255, 255), bg: Rgb(45, 45, 45), underline: Reset, modifier: NONE,
+            ]
+        },
+        Buffer {
+            area: Rect { x: 0, y: 0, width: 0, height: 1 }
+        },
+    ],
+)

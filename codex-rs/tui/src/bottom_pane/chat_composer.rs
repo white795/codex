@@ -4,6 +4,8 @@
 //! completed slash commands to atomic elements, and handles Enter submission/newlines.
 //! It also shows Luna Reserve's yellow prompt arrow and detects unbracketed paste bursts
 //! from raw key streams, particularly on Windows.
+//! Shortcut hints use the detected platform at runtime; unit tests set the footer platform
+//! explicitly so snapshots do not depend on whether the test host runs under WSL.
 //!
 //! The plain-text preset keeps command prefixes literal, including `!`, so Enter and Tab
 //! submit ordinary text without enabling shell mode.
@@ -652,6 +654,8 @@ impl ChatComposer {
             history: ChatComposerHistory::new(),
             agents_navigation_enabled: false,
             footer: FooterState {
+                #[cfg(test)]
+                is_wsl: false,
                 quit_shortcut_expires_at: None,
                 quit_shortcut_key: key_hint::ctrl(KeyCode::Char('c')),
                 esc_backtrack_hint: false,
@@ -3883,6 +3887,9 @@ impl ChatComposer {
 
     fn footer_props(&self) -> FooterProps {
         let mode = self.footer_mode();
+        #[cfg(test)]
+        let is_wsl = mode == FooterMode::ShortcutOverlay && self.footer.is_wsl;
+        #[cfg(not(test))]
         let is_wsl = {
             #[cfg(target_os = "linux")]
             {

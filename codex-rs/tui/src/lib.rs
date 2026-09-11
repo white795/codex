@@ -201,6 +201,9 @@ mod startup_orchestration;
 mod startup_preflight;
 mod status;
 mod status_indicator_widget;
+// Staged CxLine foundation; enable at runtime with the configuration UI integration.
+#[cfg(test)]
+mod statusline;
 mod streaming;
 mod style;
 mod task_mentions;
