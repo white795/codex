@@ -6,6 +6,17 @@ use std::fs;
 use std::io::ErrorKind;
 
 #[test]
+fn runtime_loader_distinguishes_a_saved_config_from_theme_fallback() {
+    let home = tempfile::tempdir().unwrap();
+    let store = CxLineStore::new(home.path());
+    assert_eq!(store.load_saved_config().unwrap(), None);
+
+    let saved = CxLineConfig::default();
+    store.save_config(&saved).unwrap();
+    assert_eq!(store.load_saved_config().unwrap(), Some(saved));
+}
+
+#[test]
 fn missing_config_uses_the_existing_cometix_theme_without_creating_config() {
     let home = tempfile::tempdir().unwrap();
     let themes = home.path().join("cxline/themes");

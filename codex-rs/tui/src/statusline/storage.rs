@@ -29,6 +29,18 @@ impl CxLineStore {
         }
     }
 
+    /// Load only an explicitly saved main configuration.
+    ///
+    /// Runtime footer selection uses this instead of [`Self::load_config`] so a built-in or stored
+    /// theme fallback does not replace the official status line before the user saves CxLine.
+    pub(super) fn load_saved_config(&self) -> io::Result<Option<CxLineConfig>> {
+        match read_config(&self.root.join("config.toml")) {
+            Ok(config) => Ok(Some(config)),
+            Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(None),
+            Err(error) => Err(error),
+        }
+    }
+
     /// Stored themes take precedence over presets. Unusable themes fall back without
     /// repairing the file, matching the legacy loader while keeping reads side-effect free.
     pub(super) fn load_theme(&self, name: &str) -> io::Result<CxLineConfig> {

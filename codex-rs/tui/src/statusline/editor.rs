@@ -124,7 +124,6 @@ impl CxLineEditor {
     /// Match the legacy overlay's exit behavior: same-theme edits remain drafts, while a
     /// selected theme is applied even if the page exits without saving. Edits made after the
     /// switch are excluded until an explicit save succeeds.
-    #[cfg(test)]
     pub(super) fn config_for_exit(&self) -> CxLineConfig {
         if self.draft.theme == self.original_theme {
             return self.original_config.clone();

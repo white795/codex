@@ -245,6 +245,8 @@ mod composer_submission;
 mod config_errors;
 #[path = "tests/cxline_command_tests.rs"]
 mod cxline_command_tests;
+#[path = "tests/cxline_runtime_tests.rs"]
+mod cxline_runtime_tests;
 mod exec_flow;
 mod goal_menu;
 mod goal_validation;
