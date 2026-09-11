@@ -157,7 +157,7 @@ fn activating_fields_updates_the_draft_or_returns_the_required_dialog() {
 
 #[test]
 fn editor_renders_safely_in_small_offset_and_intersected_buffers() {
-    let editor = CxLineEditor::new(ThemePresets::get_cometix());
+    let mut editor = CxLineEditor::new(ThemePresets::get_cometix());
     for width in [0, 1, 2, 8, 24, 80] {
         for height in [0, 1, 2, 8, 24, 40] {
             let area = Rect::new(/*x*/ 7, /*y*/ 5, width, height);
@@ -182,7 +182,7 @@ fn editor_does_not_overwrite_content_outside_its_viewport() {
         /*x*/ 7, /*y*/ 5, /*width*/ 42, /*height*/ 30,
     );
     let mut buffer = Buffer::filled(area, Cell::new("x"));
-    let editor = CxLineEditor::new(ThemePresets::get_cometix());
+    let mut editor = CxLineEditor::new(ThemePresets::get_cometix());
 
     editor.render(viewport, &mut buffer);
 
@@ -201,7 +201,7 @@ fn editor_uses_legacy_focus_and_selected_theme_styles() {
         /*x*/ 0, /*y*/ 0, /*width*/ 100, /*height*/ 32,
     );
     let mut buffer = Buffer::empty(area);
-    let editor = CxLineEditor::new(ThemePresets::get_cometix());
+    let mut editor = CxLineEditor::new(ThemePresets::get_cometix());
 
     editor.render(area, &mut buffer);
 
@@ -223,7 +223,7 @@ fn editor_uses_legacy_focus_and_selected_theme_styles() {
 fn editor_layout_preserves_the_legacy_page_at_wide_and_narrow_sizes() {
     let mut editor = CxLineEditor::new(ThemePresets::get_cometix());
     let wide = render_text(
-        &editor,
+        &mut editor,
         Rect::new(
             /*x*/ 0, /*y*/ 0, /*width*/ 100, /*height*/ 32,
         ),
@@ -233,7 +233,7 @@ fn editor_layout_preserves_the_legacy_page_at_wide_and_narrow_sizes() {
     editor.selected_segment = 2;
     editor.selected_field = EditorField::TextColor;
     let narrow = render_text(
-        &editor,
+        &mut editor,
         Rect::new(
             /*x*/ 0, /*y*/ 0, /*width*/ 48, /*height*/ 24,
         ),
@@ -251,7 +251,7 @@ fn has_styled_symbol(buffer: &Buffer, symbol: &str, foreground: Color, modifier:
     })
 }
 
-fn render_text(editor: &CxLineEditor, area: Rect) -> String {
+fn render_text(editor: &mut CxLineEditor, area: Rect) -> String {
     let mut buffer = Buffer::empty(area);
     editor.render(area, &mut buffer);
     let Some((left, top, right, bottom)) = non_blank_bounds(&buffer) else {

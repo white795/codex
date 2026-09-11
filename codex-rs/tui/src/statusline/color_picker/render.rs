@@ -19,7 +19,7 @@ use super::RgbField;
 use crate::statusline::style::AnsiColor;
 
 impl ColorPicker {
-    pub(super) fn render(&mut self, area: Rect, buf: &mut Buffer) {
+    pub(in crate::statusline) fn render(&mut self, area: Rect, buf: &mut Buffer) {
         let area = area.intersection(buf.area);
         if !self.is_open || area.is_empty() {
             return;
