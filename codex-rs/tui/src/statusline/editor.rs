@@ -2,6 +2,7 @@
 //! Pure editing state for the CxLine configuration page.
 
 mod input;
+mod persistence;
 mod render;
 
 use super::color_picker::ColorPicker;
@@ -76,6 +77,12 @@ pub(super) enum EditorCommand {
     SaveConfig,
     SaveTheme,
     SaveNewTheme(String),
+}
+
+#[derive(Debug, Clone, PartialEq)]
+pub(super) enum EditorOutcome {
+    Continue,
+    Exit,
 }
 
 #[derive(Debug, Clone)]
@@ -281,3 +288,7 @@ mod tests;
 #[cfg(test)]
 #[path = "editor_input_tests.rs"]
 mod input_tests;
+
+#[cfg(test)]
+#[path = "editor_persistence_tests.rs"]
+mod persistence_tests;
