@@ -14,6 +14,19 @@ use std::collections::HashMap;
 
 mod powerline;
 
+/// Built-in themes shown by the legacy CxLine configuration page.
+pub const THEME_NAMES: &[&str] = &[
+    "default",
+    "cometix",
+    "minimal",
+    "gruvbox",
+    "nord",
+    "powerline-dark",
+    "powerline-light",
+    "powerline-rose-pine",
+    "powerline-tokyo-night",
+];
+
 /// Built-in themes only; construction never consults the filesystem.
 pub struct ThemePresets;
 
