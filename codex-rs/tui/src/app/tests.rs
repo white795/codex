@@ -21,6 +21,8 @@ mod background_task_defaults_tests;
 mod buffered_replay;
 #[path = "tests/connector_policy.rs"]
 mod connector_policy;
+#[path = "tests/cxline_overlay_tests.rs"]
+mod cxline_overlay_tests;
 #[path = "tests/disconnect_tests.rs"]
 mod disconnect;
 #[path = "tests/key_chords.rs"]

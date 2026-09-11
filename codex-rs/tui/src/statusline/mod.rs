@@ -11,6 +11,7 @@ mod config;
 mod editor;
 mod icon_selector;
 mod name_input;
+mod overlay;
 mod renderer;
 mod segment;
 mod segments;
@@ -20,9 +21,14 @@ mod style;
 mod themes;
 
 use codex_protocol::openai_models::ReasoningEffort;
+#[cfg(test)]
 use config::CxLineConfig;
+pub(crate) use overlay::CxLineOverlay;
+#[cfg(test)]
 use renderer::StatusLineRenderer;
+#[cfg(test)]
 use segment::Segment;
+#[cfg(test)]
 use segment::SegmentId;
 use std::path::Path;
 
@@ -37,6 +43,10 @@ mod storage_tests;
 #[cfg(test)]
 #[path = "text_editor_tests.rs"]
 mod text_editor_tests;
+
+#[cfg(test)]
+#[path = "overlay_tests.rs"]
+mod overlay_tests;
 
 /// Git 预览数据（用于配置页预览）
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -130,6 +140,7 @@ impl<'a> StatusLineContext<'a> {
 
 /// 构建状态栏
 /// 收集所有 segment 数据并返回渲染器
+#[cfg(test)]
 pub fn build_statusline<'a>(
     config: &'a CxLineConfig,
     ctx: &StatusLineContext<'_>,

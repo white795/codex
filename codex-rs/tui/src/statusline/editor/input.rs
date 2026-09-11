@@ -17,7 +17,7 @@ use crate::statusline::style::StyleMode;
 use crate::statusline::themes::THEME_NAMES;
 
 impl CxLineEditor {
-    pub(super) fn handle_key_event(&mut self, key_event: KeyEvent) -> EditorCommand {
+    pub(in crate::statusline) fn handle_key_event(&mut self, key_event: KeyEvent) -> EditorCommand {
         if key_event.kind != KeyEventKind::Press && key_event.kind != KeyEventKind::Repeat {
             return EditorCommand::None;
         }

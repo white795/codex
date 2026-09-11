@@ -1836,6 +1836,11 @@ impl App {
                     self.launch_external_editor(tui).await;
                 }
             }
+            AppEvent::OpenCxlineConfig => {
+                let _ = tui.enter_alt_screen();
+                self.overlay = Some(Overlay::new_cxline(&self.local_settings.codex_home));
+                tui.frame_requester().schedule_frame();
+            }
             AppEvent::OpenWindowsSandboxEnablePrompt {
                 preset,
                 profile_selection,

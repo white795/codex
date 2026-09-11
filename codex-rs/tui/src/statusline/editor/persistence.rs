@@ -9,7 +9,7 @@ use super::EditorOutcome;
 use crate::statusline::storage::CxLineStore;
 
 impl CxLineEditor {
-    pub(super) fn execute_command(
+    pub(in crate::statusline) fn execute_command(
         &mut self,
         store: &CxLineStore,
         command: EditorCommand,

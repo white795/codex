@@ -518,6 +518,9 @@ impl ChatWidget {
             SlashCommand::Statusline => {
                 self.open_status_line_setup();
             }
+            SlashCommand::Cxline => {
+                self.app_event_tx.send(AppEvent::OpenCxlineConfig);
+            }
             SlashCommand::Theme => {
                 self.open_theme_picker();
             }
@@ -1231,6 +1234,7 @@ impl ChatWidget {
             | SlashCommand::Hooks
             | SlashCommand::Title
             | SlashCommand::Statusline
+            | SlashCommand::Cxline
             | SlashCommand::Theme
             | SlashCommand::Pets => QueueDrain::Stop,
         }

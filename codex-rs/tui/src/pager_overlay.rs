@@ -35,6 +35,7 @@ use crate::keymap::PagerKeymap;
 use crate::render::Insets;
 use crate::render::renderable::InsetRenderable;
 use crate::render::renderable::Renderable;
+use crate::statusline::CxLineOverlay;
 use crate::terminal_hyperlinks::HyperlinkLine;
 use crate::tui;
 use crate::tui::TuiEvent;
@@ -58,6 +59,7 @@ use scrolling::render_offset_content;
 pub(crate) enum Overlay {
     Transcript(TranscriptOverlay),
     Static(StaticOverlay),
+    Cxline(Box<CxLineOverlay>),
 }
 
 impl Overlay {
@@ -81,10 +83,15 @@ impl Overlay {
         Self::Static(StaticOverlay::with_renderables(renderables, title, keymap))
     }
 
+    pub(crate) fn new_cxline(codex_home: &std::path::Path) -> Self {
+        Self::Cxline(Box::new(CxLineOverlay::new(codex_home)))
+    }
+
     pub(crate) fn handle_event(&mut self, tui: &mut tui::Tui, event: TuiEvent) -> Result<()> {
         match self {
             Overlay::Transcript(o) => o.handle_event(tui, event),
             Overlay::Static(o) => o.handle_event(tui, event),
+            Overlay::Cxline(o) => o.handle_event(tui, event),
         }
     }
 
@@ -92,6 +99,7 @@ impl Overlay {
         match self {
             Overlay::Transcript(o) => o.is_done(),
             Overlay::Static(o) => o.is_done(),
+            Overlay::Cxline(o) => o.is_done(),
         }
     }
 }

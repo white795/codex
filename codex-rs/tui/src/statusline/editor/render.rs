@@ -53,7 +53,7 @@ const HELP_ITEMS: [(&str, &str); 12] = [
 ];
 
 impl CxLineEditor {
-    pub(super) fn render(&mut self, area: Rect, buf: &mut Buffer) {
+    pub(in crate::statusline) fn render(&mut self, area: Rect, buf: &mut Buffer) {
         let area = area.intersection(buf.area);
         if area.is_empty() {
             return;
