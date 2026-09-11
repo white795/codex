@@ -1,0 +1,70 @@
+---
+source: tui/src/statusline/text_editor_tests.rs
+expression: buffers
+---
+[
+    Buffer {
+        area: Rect { x: 0, y: 0, width: 60, height: 18 },
+        content: [
+            "                                                            ",
+            "  ┌Separator Editor─────────────────────────────────────┐   ",
+            "  │┌Current Separator──────────────────────────────────┐│   ",
+            "  ││>  │  <                                            ││   ",
+            "  │└───────────────────────────────────────────────────┘│   ",
+            "  │┌Presets (↑↓ to select)─────────────────────────────┐│   ",
+            "  ││[ ] Pipe - Classic pipe                            ││   ",
+            "  ││[•] Thin - Thin vertical line                      ││   ",
+            "  ││[ ] Arrow - Powerline arrow                        ││   ",
+            "  ││[ ] Space - Double space                           ││   ",
+            "  ││[ ] Dot - Middle dot                               ││   ",
+            "  ││                                                   ││   ",
+            "  │└───────────────────────────────────────────────────┘│   ",
+            "  │┌───────────────────────────────────────────────────┐│   ",
+            "  ││[Enter] Confirm  [Esc] Cancel  [Tab] Clear         ││   ",
+            "  │└───────────────────────────────────────────────────┘│   ",
+            "  └─────────────────────────────────────────────────────┘   ",
+            "                                                            ",
+        ],
+        styles: [
+            x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 3, y: 2, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 56, y: 2, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 3, y: 3, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 56, y: 3, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 3, y: 4, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 56, y: 4, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        ]
+    },
+    Buffer {
+        area: Rect { x: 0, y: 0, width: 24, height: 18 },
+        content: [
+            "                        ",
+            "┌Separator Editor──────┐",
+            "│┌Current Separator───┐│",
+            "││>  │  <             ││",
+            "│└────────────────────┘│",
+            "│┌Presets (↑↓ to selec┐│",
+            "││[ ] Pipe - Classic p││",
+            "││[•] Thin - Thin vert││",
+            "││[ ] Arrow - Powerlin││",
+            "││[ ] Space - Double s││",
+            "││[ ] Dot - Middle dot││",
+            "││                    ││",
+            "│└────────────────────┘│",
+            "│┌────────────────────┐│",
+            "││[Enter] Confirm  [Es││",
+            "│└────────────────────┘│",
+            "└──────────────────────┘",
+            "                        ",
+        ],
+        styles: [
+            x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 1, y: 2, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 23, y: 2, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 1, y: 3, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 23, y: 3, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 1, y: 4, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 23, y: 4, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        ]
+    },
+]

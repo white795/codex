@@ -7,9 +7,12 @@
 //! Git here only renders supplied data; background command execution is a later stage.
 
 mod config;
+mod name_input;
 mod renderer;
 mod segment;
 mod segments;
+mod separator_editor;
+mod storage;
 mod style;
 mod themes;
 
@@ -23,6 +26,14 @@ use std::path::Path;
 #[cfg(test)]
 #[path = "foundation_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "storage_tests.rs"]
+mod storage_tests;
+
+#[cfg(test)]
+#[path = "text_editor_tests.rs"]
+mod text_editor_tests;
 
 /// Git 预览数据（用于配置页预览）
 #[derive(Debug, Clone, PartialEq, Eq)]
