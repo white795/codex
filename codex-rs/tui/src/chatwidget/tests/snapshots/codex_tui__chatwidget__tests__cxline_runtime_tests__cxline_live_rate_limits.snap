@@ -1,0 +1,6 @@
+---
+source: tui/src/chatwidget/tests/cxline_runtime_tests.rs
+assertion_line: 128
+expression: initial
+---
+ gpt-5.6-sol │ 󰉋 project │  - · - tokens │ 󰪡 25%

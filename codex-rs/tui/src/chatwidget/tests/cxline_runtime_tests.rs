@@ -13,6 +13,33 @@ fn save_cxline_config(chat: &ChatWidget, config: &CxLineConfig) {
     .expect("save CxLine config");
 }
 
+fn paired_usage_snapshot(
+    limit_id: &str,
+    primary_used_percent: i32,
+    secondary_used_percent: i32,
+) -> RateLimitSnapshot {
+    RateLimitSnapshot {
+        limit_id: Some(limit_id.to_string()),
+        limit_name: Some(limit_id.to_string()),
+        normal_model_slug: None,
+        primary: Some(RateLimitWindow {
+            used_percent: primary_used_percent,
+            window_duration_mins: Some(5 * 60),
+            resets_at: None,
+        }),
+        secondary: Some(RateLimitWindow {
+            used_percent: secondary_used_percent,
+            window_duration_mins: Some(7 * 24 * 60),
+            resets_at: None,
+        }),
+        credits: None,
+        individual_limit: None,
+        plan_type: None,
+        spend_control_reached: None,
+        rate_limit_reached_type: None,
+    }
+}
+
 #[tokio::test]
 async fn missing_cxline_config_keeps_the_official_status_line() {
     let (mut chat, _rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
@@ -73,4 +100,71 @@ fn saved_cxline_config_is_available_during_runtime_startup() {
     let runtime = crate::chatwidget::cxline::CxLineRuntime::load(home.path());
 
     assert_eq!(runtime.enabled_config(), Some(&saved));
+}
+
+#[tokio::test]
+async fn cxline_uses_only_codex_rate_limits_and_tracks_window_updates() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
+    let config = CxLineConfig::default();
+    save_cxline_config(&chat, &config);
+    chat.apply_cxline_editor_config(config);
+
+    chat.on_rate_limit_snapshot(Some(paired_usage_snapshot(
+        "codex_other",
+        /*primary_used_percent*/ 91,
+        /*secondary_used_percent*/ 88,
+    )));
+    assert!(
+        !status_line_text(&chat)
+            .expect("CxLine footer")
+            .contains("91%")
+    );
+
+    chat.on_rate_limit_snapshot(Some(paired_usage_snapshot(
+        "codex", /*primary_used_percent*/ 25, /*secondary_used_percent*/ 40,
+    )));
+    let initial = status_line_text(&chat).expect("CxLine footer with usage");
+    assert!(initial.contains("25%"));
+    insta::assert_snapshot!("cxline_live_rate_limits", initial);
+
+    chat.on_rate_limit_snapshot(Some(paired_usage_snapshot(
+        "codex", /*primary_used_percent*/ 63, /*secondary_used_percent*/ 77,
+    )));
+    let updated = status_line_text(&chat).expect("updated CxLine footer");
+    assert!(updated.contains("63%"));
+    assert!(!updated.contains("25%"));
+}
+
+#[tokio::test]
+async fn cxline_weekly_only_usage_uses_the_weekly_percent_and_reset_label() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(/*model_override*/ None).await;
+    let config = CxLineConfig::default();
+    save_cxline_config(&chat, &config);
+    chat.apply_cxline_editor_config(config);
+    chat.on_rate_limit_snapshot(Some(RateLimitSnapshot {
+        limit_id: Some("codex".to_string()),
+        limit_name: Some("codex".to_string()),
+        normal_model_slug: None,
+        primary: Some(RateLimitWindow {
+            used_percent: 42,
+            window_duration_mins: Some(7 * 24 * 60),
+            resets_at: Some(1_800_000_000),
+        }),
+        secondary: None,
+        credits: None,
+        individual_limit: None,
+        plan_type: None,
+        spend_control_reached: None,
+        rate_limit_reached_type: None,
+    }));
+    let reset_label = chat
+        .rate_limit_snapshots_by_limit_id
+        .get("codex")
+        .and_then(|snapshot| snapshot.primary.as_ref())
+        .and_then(|window| window.resets_at.as_deref())
+        .expect("localized weekly reset label");
+
+    let line = status_line_text(&chat).expect("CxLine footer with weekly usage");
+
+    assert!(line.contains(&format!("42% · {reset_label}")));
 }

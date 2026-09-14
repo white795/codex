@@ -1093,7 +1093,7 @@ impl ChatWidget {
     }
 }
 
-fn five_hour_status_window(
+pub(super) fn five_hour_status_window(
     snapshot: &RateLimitSnapshotDisplay,
 ) -> Option<(&RateLimitWindowDisplay, bool)> {
     find_primary_codex_window(snapshot, "5h")
@@ -1102,7 +1102,7 @@ fn five_hour_status_window(
         .or_else(|| non_weekly_secondary_window_when_primary_is_weekly(snapshot))
 }
 
-fn weekly_status_window(
+pub(super) fn weekly_status_window(
     snapshot: &RateLimitSnapshotDisplay,
 ) -> Option<(&RateLimitWindowDisplay, bool)> {
     find_codex_window(snapshot, "weekly")
