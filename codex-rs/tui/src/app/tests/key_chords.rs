@@ -103,8 +103,9 @@ async fn completed_global_chord_reuses_the_existing_action_handler() -> Result<(
         render_bottom_popup(&app.chat_widget, /*width*/ 80)
             .replace(&test_path_display("/tmp/project"), "/tmp/project"),
         @r"
-        › Ask Codex to do anything
-
+        ────────────────────────────────────────────────────────────────────────────────
+        ❯ Ask Codex to do anything
+        ────────────────────────────────────────────────────────────────────────────────
            ctrl + x … waiting for next key    esc cancel
         "
     );
@@ -564,7 +565,7 @@ async fn physical_chords_route_list_and_mixed_request_input_modals() -> Result<(
     let contexts = app.chat_widget.keymap_contexts();
     assert!(contexts.contains(KeymapContext::Chat));
     assert!(contexts.contains(KeymapContext::List));
-    assert!(render_bottom_popup(&app.chat_widget, /*width*/ 80).contains("› 1. First"));
+    assert!(render_bottom_popup(&app.chat_widget, /*width*/ 80).contains("❯ 1. First"));
 
     press(&mut app, &mut tui, &mut app_server, ctrl('x')).await?;
     assert!(app.key_chord_matcher.is_pending());
@@ -575,7 +576,7 @@ async fn physical_chords_route_list_and_mixed_request_input_modals() -> Result<(
         KeyCode::Char('j').into(),
     )
     .await?;
-    assert!(render_bottom_popup(&app.chat_widget, /*width*/ 80).contains("› 2. Second"));
+    assert!(render_bottom_popup(&app.chat_widget, /*width*/ 80).contains("❯ 2. Second"));
 
     press(&mut app, &mut tui, &mut app_server, ctrl('x')).await?;
     press(&mut app, &mut tui, &mut app_server, ctrl('u')).await?;

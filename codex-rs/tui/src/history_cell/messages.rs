@@ -246,7 +246,7 @@ impl HistoryCell for UserHistoryCell {
             return Vec::new();
         }
 
-        let mut lines = vec![HyperlinkLine::new(Line::from("").style(style))];
+        let mut lines = vec![HyperlinkLine::new(Line::from(""))];
 
         if let Some(wrapped_remote_images) = wrapped_remote_images {
             lines.extend(prefix_hyperlink_lines(
@@ -267,7 +267,7 @@ impl HistoryCell for UserHistoryCell {
             ));
         }
 
-        lines.push(HyperlinkLine::new(Line::from("").style(style)));
+        lines.push(HyperlinkLine::new(Line::from("")));
         lines
     }
 

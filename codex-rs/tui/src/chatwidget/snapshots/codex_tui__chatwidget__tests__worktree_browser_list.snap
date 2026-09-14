@@ -7,6 +7,6 @@ expression: "render_bottom_popup(&chat, 80)"
   Select a worktree to resume its owner or copy its working directory
 
 
-› /repo/worktree  Owner: 00000000-0000-0000-0000-000000000001
+❯ /repo/worktree  Owner: 00000000-0000-0000-0000-000000000001
 
   Press enter to confirm or esc to go back

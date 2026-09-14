@@ -895,7 +895,7 @@ async fn approvals_popup_navigation_skips_disabled() {
     for line in popup.lines() {
         let row = line
             .trim_start()
-            .strip_prefix('\u{203a}')
+            .strip_prefix('❯')
             .unwrap_or_else(|| line.trim_start())
             .trim_start();
         let mut chars = row.chars();
@@ -917,7 +917,7 @@ async fn approvals_popup_navigation_skips_disabled() {
         let popup = render_bottom_popup(&chat, /*width*/ 80);
         let selected_disabled = popup
             .lines()
-            .find(|line| line.trim_start().starts_with('\u{203a}'))
+            .find(|line| line.trim_start().starts_with('❯'))
             .expect("expected a selected selection row")
             .contains("(disabled)");
         assert!(
@@ -1318,7 +1318,7 @@ async fn permissions_selection_sends_approvals_reviewer_in_override_turn_context
     assert!(
         popup
             .lines()
-            .any(|line| line.contains("(current)") && line.contains('›')),
+            .any(|line| line.contains("(current)") && line.contains('❯')),
         "expected permissions popup to open with the current preset selected: {popup}"
     );
 
@@ -1327,7 +1327,7 @@ async fn permissions_selection_sends_approvals_reviewer_in_override_turn_context
     assert!(
         popup
             .lines()
-            .any(|line| line.contains("Approve for me") && line.contains('›')),
+            .any(|line| line.contains("Approve for me") && line.contains('❯')),
         "expected one Down from Ask for approval to select Approve for me: {popup}"
     );
     chat.handle_key_event(KeyEvent::from(KeyCode::Enter));
