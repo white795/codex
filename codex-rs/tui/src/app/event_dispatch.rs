@@ -3027,6 +3027,18 @@ impl App {
             AppEvent::StatusLineSetupCancelled => {
                 self.chat_widget.cancel_status_line_setup();
             }
+            AppEvent::CxLineGitPreviewUpdated {
+                request_id,
+                cwd,
+                preview,
+            } => {
+                if self
+                    .chat_widget
+                    .set_cxline_git_preview(request_id, cwd, preview)
+                {
+                    tui.frame_requester().schedule_frame();
+                }
+            }
             AppEvent::TerminalTitleSetup { items } => {
                 let ids = items.iter().map(ToString::to_string).collect::<Vec<_>>();
                 let edit = crate::legacy_core::config::edit::terminal_title_items_edit(&ids);
