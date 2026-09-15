@@ -4,6 +4,9 @@ This repository keeps the upstream-compatible Codex version in Cargo metadata an
 separate user-visible CxLine revision. It is intentionally maintained for WSL/Linux x86_64
 only.
 
+The first release is in daily use. See the [0.154.0 handoff](CXLINE_RELEASE_0.154.0.md)
+for the released commit, verification evidence, retained limitations, and next-upgrade entry points.
+
 ## Version convention
 
 - Upstream compatibility version: `0.154.0`
@@ -71,13 +74,49 @@ For each selected stable upstream tag:
 
 1. Update local `main` from `upstream` and verify the unmodified upstream baseline.
 2. Create `cxline/<new-version>` from that tag.
-3. Reapply the small CxLine commits in functional order: statusline core, configuration UI,
-   runtime integration, input visuals, then build identity.
+3. Review the previous customization range, then reapply the small CxLine commits in functional
+   order: statusline core, configuration UI, runtime integration, input visuals, build identity,
+   then fork CI and maintenance documentation. Check whether upstream already solves each change.
 4. Resolve against the new TUI APIs instead of copying old upstream files wholesale.
 5. Update `CODEX_BUILD_VERSION` to `<new-version>+cxline.1` while keeping Cargo and protocol
    versions at the upstream value.
-6. Run the branch CI, repeat the WSL manual checklist, run the release workflow manually, and
-   only then create the release tag.
+6. Run the branch CI and repeat the WSL manual checklist. Run a manual release candidate when
+   available; otherwise use the tag-triggered build as described in the release checklist.
+7. Install the complete package into a new version directory, verify it, then switch `current`.
 
 Do not copy Cometix's npm scope, translation feature, workflow deletion, or multi-platform
 release matrix unless those become explicit requirements later.
+
+## Personal installation and rollback
+
+Download the complete `.tar.gz` package and `SHA256SUMS` from the selected GitHub Release.
+In the download directory, run `sha256sum --check --ignore-missing SHA256SUMS` and confirm
+that the archive is reported as `OK` before extracting it. The archive has no enclosing directory:
+keep `bin/`, `codex-resources/`, `codex-path/`, and `codex-package.json` together.
+
+The first installation uses this layout:
+
+```text
+~/.local/opt/codex-cxline/0.154.0+cxline.1/
+~/.local/opt/codex-cxline/current -> 0.154.0+cxline.1/
+~/.local/bin/codex-cxline -> ~/.local/opt/codex-cxline/current/bin/codex
+```
+
+With `~/.local/bin` on `PATH`, the interactive Bash aliases are:
+
+```bash
+alias codex='codex-cxline'
+alias cx="$HOME/.local/bin/codex-cxline"
+alias codex-default="$HOME/.local/bin/codex"
+```
+
+The last path is the existing npm-installed official launcher on this machine; verify it before
+reusing these aliases elsewhere. Aliases affect interactive Bash, not necessarily scripts or IDE
+launchers. Both builds use the existing `~/.codex` unless `CODEX_HOME` is explicitly overridden.
+
+For each upgrade, extract into a new version directory and test its absolute `bin/codex` path
+with an isolated `CODEX_HOME` first. Back up the active configuration before testing it with the
+new version. After validation, repoint only the existing `current` symlink to the tested directory.
+Keep the previous directory so rollback can repoint `current` to it, then start a new process.
+Switching binaries does not roll back configuration or session data. An installer script is a
+possible future convenience, not part of the first release.
