@@ -57,6 +57,7 @@ pub enum SlashCommand {
     DebugConfig,
     Title,
     Statusline,
+    Cxline,
     Theme,
     #[strum(to_string = "pets", serialize = "pet")]
     Pets,
@@ -117,6 +118,7 @@ impl SlashCommand {
             SlashCommand::DebugConfig => "show config layers and requirement sources for debugging",
             SlashCommand::Title => "configure which items appear in the terminal title",
             SlashCommand::Statusline => "configure which items appear in the status line",
+            SlashCommand::Cxline => "configure CxLine appearance",
             SlashCommand::Theme => "choose a syntax highlighting theme",
             SlashCommand::Pets => "choose or hide the terminal pet",
             SlashCommand::Ps => "list background terminals",
@@ -252,6 +254,7 @@ impl SlashCommand {
             | SlashCommand::Plugins
             | SlashCommand::Title
             | SlashCommand::Statusline
+            | SlashCommand::Cxline
             | SlashCommand::AutoReview
             | SlashCommand::Feedback
             | SlashCommand::Ide
@@ -314,10 +317,21 @@ mod tests {
         assert!(SlashCommand::Ide.available_during_task());
         assert!(SlashCommand::Title.available_during_task());
         assert!(SlashCommand::Statusline.available_during_task());
+        assert!(SlashCommand::Cxline.available_during_task());
         assert!(SlashCommand::Raw.available_during_task());
         assert!(SlashCommand::Raw.available_in_side_conversation());
         assert!(SlashCommand::Raw.supports_inline_args());
         assert!(SlashCommand::App.available_during_task());
+    }
+
+    #[test]
+    fn cxline_command_has_a_distinct_configuration_entry() {
+        assert_eq!(SlashCommand::Cxline.command(), "cxline");
+        assert_eq!(SlashCommand::from_str("cxline"), Ok(SlashCommand::Cxline));
+        assert_eq!(
+            SlashCommand::Cxline.description(),
+            "configure CxLine appearance"
+        );
     }
 
     #[test]

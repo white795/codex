@@ -104,7 +104,7 @@ impl EffortTier {
 
     fn prompt_glyph(self) -> &'static str {
         match self {
-            Self::Max => "›",
+            Self::Max => "❯",
             Self::Ultra => "»",
         }
     }

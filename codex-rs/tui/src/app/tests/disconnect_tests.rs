@@ -154,12 +154,12 @@ async fn lost_mutation_reply_preserves_work_without_resubmitting() -> Result<()>
     );
     let rendered = render_bottom_popup(&app.chat_widget, /*width*/ 80);
     let draft = rendered
-        .split_once("› ")
+        .split_once("❯ ")
         .unwrap()
         .1
-        .split("\n\n")
-        .next()
-        .unwrap();
+        .split_once("\n─")
+        .unwrap()
+        .0;
     assert_snapshot!("offline_expanded_paste", draft);
     assert!(ops.try_recv().is_err());
     for character in ['c', 'C', 'd', 'D'] {

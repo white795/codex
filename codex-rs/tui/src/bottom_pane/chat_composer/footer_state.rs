@@ -26,6 +26,9 @@ impl super::ChatComposer {
 }
 
 pub(super) struct FooterState {
+    /// Explicit platform fixture; unit-test rendering must not probe the host.
+    #[cfg(test)]
+    pub(super) is_wsl: bool,
     pub(super) quit_shortcut_expires_at: Option<Instant>,
     pub(super) quit_shortcut_key: KeyBinding,
     pub(super) esc_backtrack_hint: bool,
@@ -84,3 +87,7 @@ impl FooterState {
         })
     }
 }
+
+#[cfg(test)]
+#[path = "footer_state_tests.rs"]
+mod tests;

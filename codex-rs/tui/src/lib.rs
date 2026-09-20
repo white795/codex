@@ -202,6 +202,7 @@ mod startup_orchestration;
 mod startup_preflight;
 mod status;
 mod status_indicator_widget;
+mod statusline;
 mod streaming;
 mod style;
 mod task_mentions;
@@ -231,6 +232,7 @@ mod updates;
 #[cfg(any(not(debug_assertions), test))]
 mod updates_cache;
 mod version;
+pub use version::CODEX_BUILD_VERSION;
 mod vim_search;
 mod width;
 #[cfg(any(target_os = "windows", test))]

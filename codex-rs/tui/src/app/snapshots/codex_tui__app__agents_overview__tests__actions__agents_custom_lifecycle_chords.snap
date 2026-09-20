@@ -19,9 +19,9 @@ expression: "render_bottom_popup(&app.chat_widget, 48)"
 
 
   New task
-
-› Describe a new task
-
+────────────────────────────────────────────────
+❯ Describe a new task
+────────────────────────────────────────────────
   ↑↓ navigate ctrl+o resume → open
   ctrl+n new task ctrl+f search ctrl+s group
   ctrl+r rename ctrl+x stop f5 f8 hide

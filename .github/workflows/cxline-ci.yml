@@ -1,0 +1,73 @@
+name: cxline-ci
+
+on:
+  push:
+    branches:
+      - "cxline/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_BUILD_JOBS: "2"
+  CARGO_INCREMENTAL: "0"
+  CARGO_NET_GIT_FETCH_WITH_CLI: "true"
+  TARGET: x86_64-unknown-linux-gnu
+
+jobs:
+  quality:
+    name: WSL/Linux quality gate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 90
+    defaults:
+      run:
+        working-directory: codex-rs
+
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          persist-credentials: false
+
+      - uses: ./.github/actions/setup-ci
+
+      - name: Install Linux build dependencies
+        shell: bash
+        run: |
+          set -euo pipefail
+          sudo apt-get update -y
+          sudo DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            build-essential \
+            libasound2-dev \
+            libcap-dev \
+            pkg-config
+
+      - uses: dtolnay/rust-toolchain@e081816240890017053eacbb1bdf337761dc5582 # 1.95.0
+        with:
+          components: clippy, rustfmt
+
+      - name: Configure rusty_v8 artifacts
+        uses: ./.github/actions/setup-rusty-v8
+        with:
+          target: ${{ env.TARGET }}
+
+      - uses: taiki-e/install-action@44c6d64aa62cd779e873306675c7a58e86d6d532 # v2.62.49
+        with:
+          tool: nextest
+          version: 0.9.103
+
+      - name: Check Rust formatting
+        run: cargo fmt -- --config imports_granularity=Item --check
+
+      - name: Check CLI build
+        run: cargo check --locked -p codex-cli --bin codex
+
+      - name: Lint CxLine integration
+        run: just clippy --locked -p codex-tui --lib -- -D warnings
+
+      - name: Test TUI and CxLine
+        run: just test-tui-unit --test-threads 2 --retries 0 --failure-output final

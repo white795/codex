@@ -609,6 +609,8 @@ async fn lifecycle_footer_keeps_custom_chords_with_labels() {
         assert!(
             lines
                 .iter()
+                // Composer borders span the outer area; text retains its inner padding.
+                .filter(|line| !line.chars().all(|ch| ch == '─'))
                 .all(|line| unicode_width::UnicodeWidthStr::width(line.as_str())
                     <= usize::from(width))
         );

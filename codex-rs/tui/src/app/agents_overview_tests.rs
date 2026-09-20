@@ -1995,7 +1995,7 @@ async fn command_center_cursor_tracks_wrapped_footer() {
         )],
         /*selected_thread_id*/ None,
     );
-    for (key, label) in [('n', "› Describe"), ('f', "Search ›"), ('r', "Rename ›")] {
+    for (key, label) in [('n', "❯ Describe"), ('f', "Search ›"), ('r', "Rename ›")] {
         view.handle_key_event(KeyCode::Esc.into());
         view.handle_key_event(KeyEvent::new(KeyCode::Char(key), KeyModifiers::CONTROL));
         for width in [48, 96, 120] {

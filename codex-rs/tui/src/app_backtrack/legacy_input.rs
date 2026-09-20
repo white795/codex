@@ -12,6 +12,13 @@ impl App {
         app_server: &mut AppServerSession,
         event: TuiEvent,
     ) -> Result<bool> {
+        // CxLine owns Esc and navigation while its editor is open; it must not enter transcript
+        // backtrack preview mode.
+        if matches!(self.overlay, Some(Overlay::Cxline(_))) {
+            self.overlay_forward_event(tui, event)?;
+            return Ok(true);
+        }
+
         if let TuiEvent::Key(key_event) = &event
             && let Some(Overlay::Transcript(overlay)) = self.overlay.as_ref()
             && (overlay.should_load_older(*key_event)

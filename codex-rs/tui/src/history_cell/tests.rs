@@ -2337,6 +2337,33 @@ fn user_history_cell_wraps_and_prefixes_each_line_snapshot() {
 }
 
 #[test]
+fn user_history_cell_keeps_outer_spacing_transparent() {
+    let colors = crate::terminal_probe::DefaultColors {
+        fg: (0xee, 0xee, 0xee),
+        bg: (0x10, 0x10, 0x10),
+    };
+
+    crate::terminal_palette::with_test_default_colors(colors, || {
+        let cell = UserHistoryCell {
+            message: "hello".to_string(),
+            spoken: false,
+            text_elements: Vec::new(),
+            local_image_paths: Vec::new(),
+            remote_image_urls: Vec::new(),
+        };
+
+        let lines = cell.display_lines(/*width*/ 40);
+        assert_eq!(lines.len(), 3);
+        assert_eq!(lines[0].style.bg, None);
+        assert_eq!(
+            lines[1].style.bg,
+            Some(crate::style::user_message_bg(colors.bg))
+        );
+        assert_eq!(lines[2].style.bg, None);
+    });
+}
+
+#[test]
 fn user_history_cell_wraps_long_urls_inside_the_message_gutter() {
     let url = "https://example.test/forwarded/threads/10930?page=1&search=&filter=all&queue=customer_support_unprocessed&sort=latest_desc&forwardedScope=all";
     let message = format!(

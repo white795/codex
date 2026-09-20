@@ -1955,6 +1955,15 @@ impl App {
                     self.launch_external_editor(tui).await;
                 }
             }
+            AppEvent::OpenCxlineConfig => {
+                let config = self.chat_widget.cxline_editor_config();
+                let _ = tui.enter_alt_screen();
+                self.overlay = Some(Overlay::new_cxline(
+                    &self.local_settings.codex_home,
+                    config,
+                ));
+                tui.frame_requester().schedule_frame();
+            }
             AppEvent::OpenWindowsSandboxEnablePrompt {
                 preset,
                 profile_selection,
@@ -3097,6 +3106,18 @@ impl App {
             }
             AppEvent::StatusLineSetupCancelled => {
                 self.chat_widget.cancel_status_line_setup();
+            }
+            AppEvent::CxLineGitPreviewUpdated {
+                request_id,
+                cwd,
+                preview,
+            } => {
+                if self
+                    .chat_widget
+                    .set_cxline_git_preview(request_id, cwd, preview)
+                {
+                    tui.frame_requester().schedule_frame();
+                }
             }
             AppEvent::TerminalTitleSetup { items } => {
                 let ids = items.iter().map(ToString::to_string).collect::<Vec<_>>();

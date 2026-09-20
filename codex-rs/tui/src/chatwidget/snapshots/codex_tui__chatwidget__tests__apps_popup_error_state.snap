@@ -8,6 +8,6 @@ expression: popup
 
      App directory unavailable  The app directory request failed. Retry, or
                                 press Esc to continue.
-› 1. Retry                      Reload installed and available apps.
+❯ 1. Retry                      Reload installed and available apps.
 
   Press enter to confirm or esc to go back

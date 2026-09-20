@@ -4,6 +4,8 @@
 //! completed slash commands to atomic elements, and handles Enter submission/newlines.
 //! It also shows Luna Reserve's yellow prompt arrow and detects unbracketed paste bursts
 //! from raw key streams, particularly on Windows.
+//! Shortcut hints use the detected platform at runtime; unit tests set the footer platform
+//! explicitly so snapshots do not depend on whether the test host runs under WSL.
 //! The live voice strip renders after effort ignition and before stars, which skip its text.
 //!
 //! The plain-text preset keeps command prefixes literal, including `!`, so Enter and Tab
@@ -229,7 +231,6 @@ use ratatui::style::Style;
 use ratatui::style::Stylize;
 use ratatui::text::Line;
 use ratatui::text::Span;
-use ratatui::widgets::Block;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::StatefulWidgetRef;
 use ratatui::widgets::Widget;
@@ -534,6 +535,7 @@ pub(crate) struct ChatComposer {
     effort_status_line_transition: Option<EffortStatusLineTransition>,
     effort_observed: bool,
     luna_reserve_active: bool,
+    is_zellij: bool,
     attachments: AttachmentState,
     placeholder_text: String,
     blocks_direct_input: bool,
@@ -657,6 +659,8 @@ impl ChatComposer {
             history: ChatComposerHistory::new(),
             agents_navigation_enabled: false,
             footer: FooterState {
+                #[cfg(test)]
+                is_wsl: false,
                 quit_shortcut_expires_at: None,
                 quit_shortcut_key: key_hint::ctrl(KeyCode::Char('c')),
                 esc_backtrack_hint: false,
@@ -704,6 +708,7 @@ impl ChatComposer {
             effort_status_line_transition: None,
             effort_observed: false,
             luna_reserve_active: false,
+            is_zellij: codex_terminal_detection::terminal_info().is_zellij(),
             attachments: AttachmentState::default(),
             placeholder_text,
             blocks_direct_input: false,
@@ -3888,6 +3893,9 @@ impl ChatComposer {
 
     fn footer_props(&self) -> FooterProps {
         let mode = self.footer_mode();
+        #[cfg(test)]
+        let is_wsl = mode == FooterMode::ShortcutOverlay && self.footer.is_wsl;
+        #[cfg(not(test))]
         let is_wsl = {
             #[cfg(target_os = "linux")]
             {
@@ -4946,7 +4954,23 @@ impl ChatComposer {
             }
         }
         let style = user_message_style();
-        Block::default().style(style).render(composer_rect, buf);
+        let border_style = Style::default().dim();
+        if composer_rect.height > 0 {
+            buf.set_string(
+                composer_rect.x,
+                composer_rect.y,
+                "─".repeat(composer_rect.width as usize),
+                border_style,
+            );
+        }
+        if composer_rect.height > 1 {
+            buf.set_string(
+                composer_rect.x,
+                composer_rect.bottom() - 1,
+                "─".repeat(composer_rect.width as usize),
+                border_style,
+            );
+        }
         if !remote_images_rect.is_empty() {
             Paragraph::new(self.attachments.remote_image_lines())
                 .style(style)
@@ -4955,24 +4979,41 @@ impl ChatComposer {
         if !textarea_rect.is_empty() {
             let prompt = if self.draft.input_enabled {
                 if self.draft.is_bash_mode {
-                    Span::from("!").light_red().bold()
+                    let prompt = Span::from("!").light_red();
+                    if self.is_zellij {
+                        prompt
+                    } else {
+                        prompt.bold()
+                    }
                 } else if self.luna_reserve_active {
                     // Reserve keeps one arrow at every reasoning effort; only its foreground changes.
-                    "›"
-                        .fg(crate::terminal_palette::best_color((246, 197, 67)))
-                        .bold()
+                    let prompt = "❯".fg(crate::terminal_palette::best_color((246, 197, 67)));
+                    if self.is_zellij {
+                        prompt
+                    } else {
+                        prompt.bold()
+                    }
                 } else if let Some(tier) = self.effort_tier {
                     let charge = self
                         .effort_ignition
                         .as_ref()
                         .map(EffortIgnition::charge_alpha)
                         .unwrap_or(1.0);
-                    tier.prompt(charge)
+                    let prompt = tier.prompt(charge);
+                    if self.is_zellij {
+                        prompt.not_bold()
+                    } else {
+                        prompt
+                    }
+                } else if self.is_zellij {
+                    Span::styled("❯", Style::default().fg(Color::Cyan))
                 } else {
-                    "›".bold()
+                    "❯".bold()
                 }
+            } else if self.is_zellij {
+                Span::styled("❯", Style::default().fg(Color::DarkGray))
             } else {
-                "›".dim()
+                "❯".dim()
             };
             buf.set_span(
                 textarea_rect.x - LIVE_PREFIX_COLS,
@@ -5202,7 +5243,7 @@ mod tests {
     }
 
     #[test]
-    fn light_terminal_palette_renders_light_composer_snapshot() {
+    fn light_terminal_palette_keeps_composer_border_transparent() {
         let colors = crate::terminal_probe::DefaultColors {
             fg: (0x55, 0x57, 0x53),
             bg: (0xff, 0xff, 0xff),
@@ -5216,16 +5257,73 @@ mod tests {
             let mut buffer = Buffer::empty(area);
             composer.render(area, &mut buffer);
 
-            assert_eq!(
-                buffer[(0, 1)].bg,
-                crate::terminal_palette::rgb_color((244, 244, 244))
-            );
+            assert_eq!(buffer[(0, 0)].bg, Color::Reset);
+            assert_eq!(buffer[(0, 1)].bg, Color::Reset);
             insta::assert_snapshot!("light_terminal_palette_composer", format!("{buffer:?}"));
         });
     }
 
     #[test]
-    fn footer_hint_row_is_separated_from_composer() {
+    fn cometix_composer_uses_transparent_borders_and_prompt_marker() {
+        let colors = crate::terminal_probe::DefaultColors {
+            fg: (0xee, 0xee, 0xee),
+            bg: (0x10, 0x10, 0x10),
+        };
+
+        crate::terminal_palette::with_test_default_colors(colors, || {
+            let (composer, _rx) = new_test_composer();
+            let area = Rect::new(
+                /*x*/ 0, /*y*/ 0, /*width*/ 40, /*height*/ 10,
+            );
+            let [composer_rect, _, textarea_rect, _] = composer
+                .layout_areas_with_textarea_right_reserve(area, /*textarea_right_reserve*/ 0);
+            let mut buffer = Buffer::empty(area);
+
+            composer.render(area, &mut buffer);
+
+            for y in [composer_rect.y, composer_rect.bottom().saturating_sub(1)] {
+                for x in composer_rect.x..composer_rect.right() {
+                    let cell = &buffer[(x, y)];
+                    assert_eq!(cell.symbol(), "─");
+                    assert_eq!(cell.bg, Color::Reset);
+                }
+            }
+            assert_eq!(
+                buffer[(textarea_rect.x - LIVE_PREFIX_COLS, textarea_rect.y)].symbol(),
+                "❯"
+            );
+        });
+    }
+
+    #[test]
+    fn zellij_composer_prompt_avoids_bold_text() {
+        let colors = crate::terminal_probe::DefaultColors {
+            fg: (0xee, 0xee, 0xee),
+            bg: (0x10, 0x10, 0x10),
+        };
+
+        crate::terminal_palette::with_test_default_colors(colors, || {
+            let (mut composer, _rx) = new_test_composer();
+            composer.is_zellij = true;
+            let area = Rect::new(
+                /*x*/ 0, /*y*/ 0, /*width*/ 40, /*height*/ 10,
+            );
+            let [_, _, textarea_rect, _] = composer
+                .layout_areas_with_textarea_right_reserve(area, /*textarea_right_reserve*/ 0);
+            let mut buffer = Buffer::empty(area);
+
+            composer.render(area, &mut buffer);
+
+            let prompt = &buffer[(textarea_rect.x - LIVE_PREFIX_COLS, textarea_rect.y)];
+            assert_eq!(prompt.symbol(), "❯");
+            assert_eq!(prompt.fg, Color::Cyan);
+            assert_eq!(prompt.bg, Color::Reset);
+            assert!(!prompt.modifier.contains(Modifier::BOLD));
+        });
+    }
+
+    #[test]
+    fn footer_hint_row_is_separated_by_composer_border() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
         let composer = ChatComposer::new(
@@ -5270,11 +5368,11 @@ mod tests {
             "expected a spacing row above the footer hints",
         );
 
-        let spacing_row = row_to_string(hint_row_idx - 1);
+        let border_row = row_to_string(hint_row_idx - 1);
         assert_eq!(
-            spacing_row.trim(),
-            "",
-            "expected blank spacing row above hints but saw: {spacing_row:?}",
+            border_row,
+            "─".repeat(area.width as usize),
+            "expected composer border above hints but saw: {border_row:?}",
         );
     }
 

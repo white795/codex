@@ -143,7 +143,7 @@ impl SkillsToggleView {
             .filter_map(|(visible_idx, actual_idx)| {
                 self.items.get(*actual_idx).map(|item| {
                     let is_selected = self.state.selected_idx == Some(visible_idx);
-                    let prefix = if is_selected { '›' } else { ' ' };
+                    let prefix = if is_selected { '❯' } else { ' ' };
                     let marker = if item.enabled { 'x' } else { ' ' };
                     let item_name = &item.name;
                     let name = format!("{prefix} [{marker}] {item_name}");
@@ -522,7 +522,7 @@ mod tests {
         assert_eq!(
             row_names,
             vec![
-                "› [x] superpowers-systematic-debugging (polish)",
+                "❯ [x] superpowers-systematic-debugging (polish)",
                 "  [ ] superpowers-verification-before-completion (polish)",
             ]
         );
@@ -548,7 +548,7 @@ mod tests {
 
         assert_eq!(
             row_names,
-            vec!["› [ ] superpowers-verification-before-completion (polish)"]
+            vec!["❯ [ ] superpowers-verification-before-completion (polish)"]
         );
     }
 
