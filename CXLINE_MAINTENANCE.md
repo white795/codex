@@ -4,15 +4,17 @@ This repository keeps the upstream-compatible Codex version in Cargo metadata an
 separate user-visible CxLine revision. It is intentionally maintained for WSL/Linux x86_64
 only.
 
-The first release (`0.154.0+cxline.1`) remains in daily use while this branch prepares
-`0.155.1+cxline.1`. See the [0.154.0 handoff](CXLINE_RELEASE_0.154.0.md)
-for the released commit, verification evidence, retained limitations, and next-upgrade entry points.
+Version `0.155.1+cxline.1` was released on 2026-09-20. See the
+[0.155.1 handoff](CXLINE_RELEASE_0.155.1.md) for the released commit, verification evidence,
+and next-upgrade entry points; the [first-release handoff](CXLINE_RELEASE_0.154.0.md) retains
+the original customization decisions and limitations. Publication does not imply local adoption:
+the last installation check still found `current` pointing to `0.154.0+cxline.1`.
 
 ## Version convention
 
 - Upstream compatibility version: `0.155.1`
 - CxLine display version: `0.155.1+cxline.1`
-- Planned release tag: `cxline-v0.155.1.1`
+- Published release tag: `cxline-v0.155.1.1`
 
 The release workflow rejects a tag when its upstream portion differs from
 `codex-rs/Cargo.toml`, or when the built binary does not report the matching CxLine revision.
@@ -21,7 +23,7 @@ when publishing another customization based on the same upstream version.
 
 ## Branch and CI strategy
 
-### Current upgrade: 0.155.1
+### Released upgrade: 0.155.1
 
 The `cxline/0.155.1` branch reapplies the previous custom release-tree delta onto
 `rust-v0.155.1` (`be2951ea34f0d295ed0becf97079f92fa5f6950e`). The standalone CxLine
@@ -31,8 +33,10 @@ and prompt. Server compatibility checks still use the upstream version, not the 
 
 Local TUI unit regression: 4,677 passed, 2 skipped. The locked CLI build check, strict scoped
 Clippy/fix, repository formatting, and Bazel lock refresh also passed; the Bazel lock was unchanged.
-This is not a release or installation sign-off: hosted CI, release-package verification, and
-WSL manual checks remain required before switching the installed `current` link.
+[Hosted CI](https://github.com/white795/codex/actions/runs/35495218889) and
+[release build/publication](https://github.com/white795/codex/actions/runs/35497535857) succeeded
+for `93869126df1e8177e533e27d2a9d42488ef72135`. The migration/release work is archived;
+downloaded-package verification and WSL manual checks remain separate installation steps.
 
 ### Workflow policy
 
@@ -61,7 +65,8 @@ status.
    GitHub exposes `workflow_dispatch` in the web UI only after the workflow file exists on the
    default branch. For the first release, either place the two CxLine workflow files on `main`, or
    skip this dry run and let the first release tag exercise the same build job before it publishes.
-4. Tag the same tested commit and push the tag:
+4. Tag the same tested commit and push the tag. The following is the already-published 0.155.1
+   example; choose a new version for future releases, and do not recreate or move this tag:
 
    ```bash
    git tag -a cxline-v0.155.1.1 -m "Release Codex CxLine 0.155.1+cxline.1"
@@ -71,6 +76,8 @@ status.
 5. Download `SHA256SUMS` and verify the selected artifact before installing it.
 
 Git writes, tags, and pushes remain manual operations performed by the repository maintainer.
+Documentation-only archival commits after publication do not require a new release or a tag move.
+Pushing such a commit to `cxline/**` still triggers CI; it does not trigger release publication.
 
 ## Artifacts
 
