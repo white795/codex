@@ -207,6 +207,8 @@ mod startup_presentation;
 mod startup_recovery;
 mod status;
 mod status_indicator_widget;
+#[cfg(test)]
+mod statusline;
 mod streaming;
 mod style;
 mod system_motion;
