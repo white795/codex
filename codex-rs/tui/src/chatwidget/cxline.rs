@@ -3,9 +3,18 @@
 use std::path::Path;
 
 use super::ChatWidget;
+use super::status_surfaces::five_hour_status_window;
+use super::status_surfaces::weekly_status_window;
 use crate::statusline::CxLineConfig;
 use crate::statusline::StatusLineContext;
 use crate::statusline::build_statusline;
+
+#[derive(Default)]
+struct CxLineRateLimits {
+    five_hour_used_percent: Option<f64>,
+    weekly_used_percent: Option<f64>,
+    weekly_resets_at: Option<String>,
+}
 
 pub(super) struct CxLineRuntime {
     config: CxLineConfig,
@@ -73,6 +82,7 @@ impl ChatWidget {
         let Some(config) = self.cxline_runtime.enabled_config() else {
             return false;
         };
+        let rate_limits = self.cxline_rate_limits();
         let (used_tokens, window_size) =
             self.token_info
                 .as_ref()
@@ -84,12 +94,31 @@ impl ChatWidget {
                 });
         let context = StatusLineContext::new(self.current_model(), self.status_line_cwd())
             .with_reasoning_effort(self.effective_reasoning_effort())
-            .with_context(used_tokens, window_size);
+            .with_context(used_tokens, window_size)
+            .with_rate_limit(
+                rate_limits.five_hour_used_percent,
+                rate_limits.weekly_used_percent,
+                rate_limits.weekly_resets_at,
+            );
         let line = build_statusline(config, &context).render_line();
 
         self.bottom_pane.set_status_line_enabled(/*enabled*/ true);
         self.set_status_line(Some(line));
         self.set_status_line_hyperlink(/*url*/ None);
         true
+    }
+
+    fn cxline_rate_limits(&self) -> CxLineRateLimits {
+        let Some(snapshot) = self.rate_limit_snapshots_by_limit_id.get("codex") else {
+            return CxLineRateLimits::default();
+        };
+        let five_hour = five_hour_status_window(snapshot).map(|(window, _)| window);
+        let weekly = weekly_status_window(snapshot).map(|(window, _)| window);
+
+        CxLineRateLimits {
+            five_hour_used_percent: five_hour.map(|window| window.used_percent),
+            weekly_used_percent: weekly.map(|window| window.used_percent),
+            weekly_resets_at: weekly.and_then(|window| window.resets_at.clone()),
+        }
     }
 }

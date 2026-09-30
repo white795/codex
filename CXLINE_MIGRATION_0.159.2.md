@@ -30,7 +30,9 @@ Summary: pending
 - Live base footer integration complete: explicitly saved and enabled configurations render model,
   directory, and context data through the current composer status surface; missing or disabled
   configurations preserve the official status line.
-- Next: live CxLine rate-limit status integration.
+- Live rate-limit integration complete: CxLine reuses the official Codex 5-hour and weekly window
+  selection, updates with account-usage snapshots, and displays the localized weekly reset label.
+- Next: live CxLine asynchronous Git status integration.
 
 ## Goal
 
