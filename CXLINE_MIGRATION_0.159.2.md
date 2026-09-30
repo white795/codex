@@ -15,7 +15,9 @@ Summary: pending
   viewport clipping, and snapshots pass on Codex 0.159.2.
 - Color picker state complete: 16/256-color navigation, RGB/HEX editing, field cycling, and
   selection preservation pass on Codex 0.159.2.
-- Next: color picker rendering and snapshots.
+- Color picker rendering complete: popup layout, palette selection, viewport clipping, and compact
+  mode snapshots pass on Codex 0.159.2.
+- Next: configuration editor state and layout.
 
 ## Goal
 
