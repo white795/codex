@@ -23,7 +23,9 @@ Summary: pending
   viewport clipping, focus styles, and wide/narrow snapshots pass on Codex 0.159.2.
 - Configuration editor interactions complete: keyboard routing, lifecycle commands, child-dialog
   priority, commit/cancel behavior, Unicode input, and overlay rendering pass on Codex 0.159.2.
-- Next: configuration editor storage commands and persistence outcomes.
+- Configuration editor persistence complete: theme selection/reset, config and theme writes,
+  save-as no-clobber behavior, exit baselines, and failure reporting pass on Codex 0.159.2.
+- Next: configuration page runtime overlay and `/cxline` entry point.
 
 ## Goal
 
