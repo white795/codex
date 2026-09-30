@@ -1,6 +1,8 @@
 // Derived from Cometix; see this module's mod.rs for provenance.
 //! Pure editing state for the CxLine configuration page.
 
+mod render;
+
 use super::color_picker::ColorTarget;
 use super::config::CxLineConfig;
 use super::segment::SegmentId;

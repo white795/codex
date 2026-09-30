@@ -19,7 +19,9 @@ Summary: pending
   mode snapshots pass on Codex 0.159.2.
 - Configuration editor state complete: draft and exit baselines, theme selection, panel navigation,
   segment ordering, and field activation pass on Codex 0.159.2.
-- Next: configuration editor rendering and layout snapshots.
+- Configuration editor rendering complete: live preview, theme and segment panels, responsive help,
+  viewport clipping, focus styles, and wide/narrow snapshots pass on Codex 0.159.2.
+- Next: configuration editor internal interactions and dialog overlays.
 
 ## Goal
 
