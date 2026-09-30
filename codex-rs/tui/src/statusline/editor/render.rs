@@ -86,6 +86,11 @@ impl CxLineEditor {
         self.render_segments(segments_area, buf);
         self.render_settings(settings_area, buf);
         self.render_help(help_area, buf);
+
+        self.color_picker.render(area, buf);
+        self.icon_selector.render(area, buf);
+        self.separator_editor.render(area, buf);
+        self.name_input_dialog.render(area, buf);
     }
 
     fn theme_selector_height(&self, width: u16) -> u16 {

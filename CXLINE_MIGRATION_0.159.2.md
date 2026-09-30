@@ -21,7 +21,9 @@ Summary: pending
   segment ordering, and field activation pass on Codex 0.159.2.
 - Configuration editor rendering complete: live preview, theme and segment panels, responsive help,
   viewport clipping, focus styles, and wide/narrow snapshots pass on Codex 0.159.2.
-- Next: configuration editor internal interactions and dialog overlays.
+- Configuration editor interactions complete: keyboard routing, lifecycle commands, child-dialog
+  priority, commit/cancel behavior, Unicode input, and overlay rendering pass on Codex 0.159.2.
+- Next: configuration editor storage commands and persistence outcomes.
 
 ## Goal
 

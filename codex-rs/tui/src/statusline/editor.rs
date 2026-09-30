@@ -1,11 +1,16 @@
 // Derived from Cometix; see this module's mod.rs for provenance.
 //! Pure editing state for the CxLine configuration page.
 
+mod input;
 mod render;
 
+use super::color_picker::ColorPicker;
 use super::color_picker::ColorTarget;
 use super::config::CxLineConfig;
+use super::icon_selector::IconSelector;
+use super::name_input::NameInputDialog;
 use super::segment::SegmentId;
+use super::separator_editor::SeparatorEditor;
 use super::style::AnsiColor;
 use super::style::StyleMode;
 
@@ -62,6 +67,17 @@ pub(super) enum EditorAction {
     },
 }
 
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(super) enum EditorCommand {
+    None,
+    Exit,
+    SelectTheme(&'static str),
+    ResetTheme(String),
+    SaveConfig,
+    SaveTheme,
+    SaveNewTheme(String),
+}
+
 #[derive(Debug, Clone)]
 pub(super) struct CxLineEditor {
     pub(super) draft: CxLineConfig,
@@ -73,6 +89,10 @@ pub(super) struct CxLineEditor {
     pub(super) selected_panel: EditorPanel,
     pub(super) selected_field: EditorField,
     pub(super) status_message: Option<String>,
+    pub(super) color_picker: ColorPicker,
+    pub(super) icon_selector: IconSelector,
+    pub(super) separator_editor: SeparatorEditor,
+    pub(super) name_input_dialog: NameInputDialog,
 }
 
 impl CxLineEditor {
@@ -87,6 +107,10 @@ impl CxLineEditor {
             selected_panel: EditorPanel::Segments,
             selected_field: EditorField::Enabled,
             status_message: None,
+            color_picker: ColorPicker::default(),
+            icon_selector: IconSelector::default(),
+            separator_editor: SeparatorEditor::default(),
+            name_input_dialog: NameInputDialog::default(),
         }
     }
 
@@ -253,3 +277,7 @@ fn move_index(current: usize, last: usize, direction: MoveDirection) -> usize {
 #[cfg(test)]
 #[path = "editor_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "editor_input_tests.rs"]
+mod input_tests;
