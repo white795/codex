@@ -9,7 +9,9 @@ Summary: pending
 
 - Foundation complete: legacy configuration parsing, built-in themes, segment collection, pure
   rendering, and snapshots pass on Codex 0.159.2.
-- Next: configuration storage and the reusable editor/input components.
+- Storage and text editing complete: side-effect-free loading, atomic saves, portable theme-name
+  validation, and Unicode-safe name/separator dialogs pass on Codex 0.159.2.
+- Next: icon and color picker components.
 
 ## Goal
 

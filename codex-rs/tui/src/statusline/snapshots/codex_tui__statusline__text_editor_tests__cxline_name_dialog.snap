@@ -1,0 +1,55 @@
+---
+source: tui/src/statusline/text_editor_tests.rs
+expression: "(empty, filled)"
+---
+(
+    Buffer {
+        area: Rect { x: 0, y: 0, width: 64, height: 10 },
+        content: [
+            "                                                                ",
+            "  ┌Save Theme────────────────────────────────────────────────┐  ",
+            "  │┌Name────────────────────────────────────────────────────┐│  ",
+            "  ││> Enter theme name <                                    ││  ",
+            "  │└────────────────────────────────────────────────────────┘│  ",
+            "  │┌────────────────────────────────────────────────────────┐│  ",
+            "  ││[Enter] Confirm  [Esc] Cancel                           ││  ",
+            "  │└────────────────────────────────────────────────────────┘│  ",
+            "  └──────────────────────────────────────────────────────────┘  ",
+            "                                                                ",
+        ],
+        styles: [
+            x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 3, y: 2, fg: DarkGray, bg: Reset, underline: Reset, modifier: NONE,
+            x: 61, y: 2, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 3, y: 3, fg: DarkGray, bg: Reset, underline: Reset, modifier: NONE,
+            x: 61, y: 3, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 3, y: 4, fg: DarkGray, bg: Reset, underline: Reset, modifier: NONE,
+            x: 61, y: 4, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        ]
+    },
+    Buffer {
+        area: Rect { x: 0, y: 0, width: 64, height: 10 },
+        content: [
+            "                                                                ",
+            "  ┌Save Theme────────────────────────────────────────────────┐  ",
+            "  │┌Name────────────────────────────────────────────────────┐│  ",
+            "  ││> 深色主题 <                                            ││  ", // hidden by multi-width symbols: [(7, " "), (9, " "), (11, " "), (13, " ")]
+            "  │└────────────────────────────────────────────────────────┘│  ",
+            "  │┌────────────────────────────────────────────────────────┐│  ",
+            "  ││[Enter] Confirm  [Esc] Cancel                           ││  ",
+            "  │└────────────────────────────────────────────────────────┘│  ",
+            "  └──────────────────────────────────────────────────────────┘  ",
+            "                                                                ",
+        ],
+        styles: [
+            x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 3, y: 2, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 61, y: 2, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 3, y: 3, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 61, y: 3, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 3, y: 4, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 61, y: 4, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        ]
+    },
+)
+

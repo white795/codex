@@ -3,6 +3,7 @@
 // Configuration is read beneath the caller's resolved CODEX_HOME.
 
 use super::segment::SegmentId;
+use super::storage::CxLineStore;
 use super::style::ColorConfig;
 use super::style::IconConfig;
 use super::style::StyleMode;
@@ -11,7 +12,6 @@ use super::themes::ThemePresets;
 use serde::Deserialize;
 use serde::Serialize;
 use std::collections::HashMap;
-use std::fs;
 use std::io;
 use std::path::Path;
 
@@ -136,16 +136,10 @@ impl Default for CxLineConfig {
 impl CxLineConfig {
     /// Read config from the resolved client home without initializing or changing files.
     ///
-    /// Missing files use built-in defaults. Other failures are returned to the UI so it
-    /// can report them and choose a fallback without overwriting the user's configuration.
+    /// A missing config uses the stored Cometix theme, then its built-in preset.
+    /// Other config failures are returned so the UI can report them without overwriting it.
     pub fn load(codex_home: &Path) -> io::Result<Self> {
-        let path = codex_home.join("cxline").join("config.toml");
-        match fs::read_to_string(path) {
-            Ok(content) => toml::from_str(&content)
-                .map_err(|error| io::Error::new(io::ErrorKind::InvalidData, error)),
-            Err(error) if error.kind() == io::ErrorKind::NotFound => Ok(Self::default()),
-            Err(error) => Err(error),
-        }
+        CxLineStore::new(codex_home).load_config()
     }
 
     /// Return configuration for a rendered segment.
