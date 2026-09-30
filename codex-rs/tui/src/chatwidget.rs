@@ -260,10 +260,12 @@ mod command_lifecycle;
 mod connector_mentions;
 mod connectors;
 mod constructor;
+mod cxline;
 mod dynamic_activity;
 mod empty_state_policy;
 pub(crate) use self::connectors::ConnectorScopeGeneration;
 use self::connectors::ConnectorsState;
+use self::cxline::CxLineRuntime;
 mod exec_state;
 use self::exec_state::RunningCommand;
 use self::exec_state::UnifiedExecProcessSummary;
@@ -520,6 +522,7 @@ pub(crate) struct ChatWidget {
     transcript: TranscriptState,
     config: Config,
     pub(crate) local_settings: crate::local_settings::LocalSettings,
+    cxline_runtime: CxLineRuntime,
     raw_output_mode: bool,
     /// Runtime value resolved by core. `config.service_tier` remains the explicit user choice.
     effective_service_tier: Option<String>,

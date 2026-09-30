@@ -23,6 +23,7 @@ use crate::key_hint::KeyBindingListExt;
 use crate::key_hint::ShortcutHint;
 use crate::keymap::PagerKeymap;
 use crate::render::renderable::Renderable;
+use crate::statusline::CxLineConfig;
 use crate::statusline::CxLineOverlay;
 use crate::terminal_hyperlinks::HyperlinkLine;
 use crate::tui;
@@ -76,8 +77,8 @@ impl Overlay {
         Self::Static(StaticOverlay::with_renderables(renderables, title, keymap))
     }
 
-    pub(crate) fn new_cxline(codex_home: &std::path::Path) -> Self {
-        Self::Cxline(Box::new(CxLineOverlay::new(codex_home)))
+    pub(crate) fn new_cxline(codex_home: &std::path::Path, config: CxLineConfig) -> Self {
+        Self::Cxline(Box::new(CxLineOverlay::new(codex_home, config)))
     }
 
     pub(crate) fn handle_event(&mut self, tui: &mut tui::Tui, event: TuiEvent) -> Result<()> {
@@ -107,6 +108,13 @@ impl Overlay {
             Overlay::Static(o) => o.is_done(),
             Overlay::Analytics(o) => o.is_done,
             Overlay::Cxline(o) => o.is_done(),
+        }
+    }
+
+    pub(crate) fn cxline_config_for_exit(&self) -> Option<CxLineConfig> {
+        match self {
+            Overlay::Cxline(overlay) => Some(overlay.config_for_exit()),
+            Overlay::Transcript(_) | Overlay::Static(_) | Overlay::Analytics(_) => None,
         }
     }
 }

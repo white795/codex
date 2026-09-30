@@ -27,7 +27,10 @@ Summary: pending
   save-as no-clobber behavior, exit baselines, and failure reporting pass on Codex 0.159.2.
 - Runtime configuration entry complete: `/cxline` dispatch, alternate-screen overlay lifecycle,
   redraw handling, persistence, and backtrack isolation pass on Codex 0.159.2.
-- Next: live CxLine footer integration with the current composer state.
+- Live base footer integration complete: explicitly saved and enabled configurations render model,
+  directory, and context data through the current composer status surface; missing or disabled
+  configurations preserve the official status line.
+- Next: live CxLine rate-limit status integration.
 
 ## Goal
 

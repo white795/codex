@@ -2167,8 +2167,12 @@ impl App {
                 }
             }
             AppEvent::OpenCxlineConfig => {
+                let config = self.chat_widget.cxline_editor_config();
                 let _ = tui.enter_alt_screen();
-                self.overlay = Some(Overlay::new_cxline(&self.local_settings.codex_home));
+                self.overlay = Some(Overlay::new_cxline(
+                    &self.local_settings.codex_home,
+                    config,
+                ));
                 tui.frame_requester().schedule_frame();
             }
             AppEvent::RefreshWindowsSandbox { thread_id } => {

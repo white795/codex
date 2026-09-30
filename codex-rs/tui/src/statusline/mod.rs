@@ -1,10 +1,10 @@
-//! CxLine configuration, rendering, and full-screen editor overlay.
+//! CxLine configuration, editing, and footer rendering.
 //!
 //! Derived from Haleclipse/codex, rust-v0.144.3-cometix,
 //! commit c5dce3cbd3914c6a3402fb00b2ee9d4df988b0a6 (Apache-2.0).
 //! The original implementation credits CCometixLine's design.
-//! Migration changes separate filesystem access from defaults and rendering.
-//! Git here only renders supplied data; background command execution is a later stage.
+//! Migration changes separate filesystem access from defaults and rendering. Git here only renders
+//! supplied data; background command execution is a later stage.
 
 mod color_picker;
 mod config;
@@ -21,14 +21,10 @@ mod style;
 mod themes;
 
 use codex_protocol::openai_models::ReasoningEffort;
-#[cfg(test)]
-use config::CxLineConfig;
+pub(crate) use config::CxLineConfig;
 pub(crate) use overlay::CxLineOverlay;
-#[cfg(test)]
 use renderer::StatusLineRenderer;
-#[cfg(test)]
 use segment::Segment;
-#[cfg(test)]
 use segment::SegmentId;
 use std::path::Path;
 
@@ -140,8 +136,7 @@ impl<'a> StatusLineContext<'a> {
 
 /// 构建状态栏
 /// 收集所有 segment 数据并返回渲染器
-#[cfg(test)]
-pub fn build_statusline<'a>(
+pub(crate) fn build_statusline<'a>(
     config: &'a CxLineConfig,
     ctx: &StatusLineContext<'_>,
 ) -> StatusLineRenderer<'a> {

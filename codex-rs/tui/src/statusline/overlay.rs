@@ -21,12 +21,9 @@ pub(crate) struct CxLineOverlay {
 }
 
 impl CxLineOverlay {
-    pub(crate) fn new(codex_home: &Path) -> Self {
+    pub(crate) fn new(codex_home: &Path, config: CxLineConfig) -> Self {
         let store = CxLineStore::new(codex_home);
-        let (config, load_error) = match CxLineConfig::load(codex_home) {
-            Ok(config) => (config, None),
-            Err(error) => (CxLineConfig::default(), Some(error)),
-        };
+        let load_error = CxLineConfig::load_saved(codex_home).err();
         let mut editor = CxLineEditor::new(config);
         if let Some(error) = load_error {
             editor.status_message = Some(format!("Failed to load configuration: {error}"));
@@ -69,6 +66,10 @@ impl CxLineOverlay {
 
     pub(crate) fn is_done(&self) -> bool {
         self.is_done
+    }
+
+    pub(crate) fn config_for_exit(&self) -> CxLineConfig {
+        self.editor.config_for_exit()
     }
 
     #[cfg(test)]

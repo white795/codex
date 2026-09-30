@@ -142,6 +142,11 @@ impl CxLineConfig {
         CxLineStore::new(codex_home).load_config()
     }
 
+    /// Read the explicitly saved main configuration without applying theme fallbacks.
+    pub(crate) fn load_saved(codex_home: &Path) -> io::Result<Option<Self>> {
+        CxLineStore::new(codex_home).load_saved_config()
+    }
+
     /// Return configuration for a rendered segment.
     pub fn get_segment_config(&self, id: SegmentId) -> &SegmentItemConfig {
         match id {
