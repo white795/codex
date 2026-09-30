@@ -13,7 +13,9 @@ Summary: pending
   validation, and Unicode-safe name/separator dialogs pass on Codex 0.159.2.
 - Icon selection complete: Plain/Nerd Font lists, per-style selection memory, custom Unicode input,
   viewport clipping, and snapshots pass on Codex 0.159.2.
-- Next: color picker state and rendering.
+- Color picker state complete: 16/256-color navigation, RGB/HEX editing, field cycling, and
+  selection preservation pass on Codex 0.159.2.
+- Next: color picker rendering and snapshots.
 
 ## Goal
 

@@ -6,6 +6,7 @@
 //! Migration changes separate filesystem access from defaults and rendering.
 //! Git here only renders supplied data; background command execution is a later stage.
 
+mod color_picker;
 mod config;
 mod icon_selector;
 mod name_input;
