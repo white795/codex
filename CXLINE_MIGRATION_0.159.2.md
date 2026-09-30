@@ -32,7 +32,10 @@ Summary: pending
   configurations preserve the official status line.
 - Live rate-limit integration complete: CxLine reuses the official Codex 5-hour and weekly window
   selection, updates with account-usage snapshots, and displays the localized weekly reset label.
-- Next: live CxLine asynchronous Git status integration.
+- Live asynchronous Git integration complete: one bounded porcelain-v2 probe runs through the
+  workspace-command boundary, stale cwd/request results are rejected, and official terminal-title
+  Git refreshes remain independent.
+- Next: final runtime regression and 0.159.2 build/release integration.
 
 ## Goal
 

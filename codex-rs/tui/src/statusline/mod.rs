@@ -3,12 +3,13 @@
 //! Derived from Haleclipse/codex, rust-v0.144.3-cometix,
 //! commit c5dce3cbd3914c6a3402fb00b2ee9d4df988b0a6 (Apache-2.0).
 //! The original implementation credits CCometixLine's design.
-//! Migration changes separate filesystem access from defaults and rendering. Git here only renders
-//! supplied data; background command execution is a later stage.
+//! Migration changes separate filesystem access from defaults and rendering. Git collection runs
+//! asynchronously through the TUI workspace-command boundary and only supplies data to rendering.
 
 mod color_picker;
 mod config;
 mod editor;
+mod git_preview;
 mod icon_selector;
 mod name_input;
 mod overlay;
@@ -22,6 +23,7 @@ mod themes;
 
 use codex_protocol::openai_models::ReasoningEffort;
 pub(crate) use config::CxLineConfig;
+pub(crate) use git_preview::collect_git_preview;
 pub(crate) use overlay::CxLineOverlay;
 use renderer::StatusLineRenderer;
 use segment::Segment;
@@ -31,6 +33,10 @@ use std::path::Path;
 #[cfg(test)]
 #[path = "foundation_tests.rs"]
 mod tests;
+
+#[cfg(test)]
+#[path = "git_preview_tests.rs"]
+mod git_preview_tests;
 
 #[cfg(test)]
 #[path = "storage_tests.rs"]

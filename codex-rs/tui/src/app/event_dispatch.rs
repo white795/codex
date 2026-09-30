@@ -3020,6 +3020,18 @@ impl App {
                     }
                 }
             }
+            AppEvent::CxLineGitPreviewUpdated {
+                request_id,
+                cwd,
+                preview,
+            } => {
+                if self
+                    .chat_widget
+                    .set_cxline_git_preview(request_id, cwd, preview)
+                {
+                    tui.frame_requester().schedule_frame();
+                }
+            }
             AppEvent::StatusLineBranchUpdated { cwd, branch } => {
                 self.chat_widget.set_status_line_branch(cwd, branch);
                 self.refresh_status_line();

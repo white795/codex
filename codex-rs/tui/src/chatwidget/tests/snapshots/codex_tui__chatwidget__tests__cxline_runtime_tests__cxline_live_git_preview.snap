@@ -1,0 +1,6 @@
+---
+source: tui/src/chatwidget/tests/cxline_runtime_tests.rs
+assertion_line: 279
+expression: line
+---
+ gpt-5.6-sol │ 󰉋 repo │ 󰊢 feature/cxline ⚠ ↑3 ↓2 │  - · - tokens
