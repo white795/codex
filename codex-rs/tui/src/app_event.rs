@@ -1490,6 +1490,9 @@ pub(crate) enum AppEvent {
     /// Launch the external editor after a normal draw has completed.
     LaunchExternalEditor,
 
+    /// Open the CxLine appearance editor in the alternate screen.
+    OpenCxlineConfig,
+
     /// Async update of the current git branch for status line rendering.
     StatusLineBranchUpdated {
         cwd: PathBuf,

@@ -25,7 +25,9 @@ Summary: pending
   priority, commit/cancel behavior, Unicode input, and overlay rendering pass on Codex 0.159.2.
 - Configuration editor persistence complete: theme selection/reset, config and theme writes,
   save-as no-clobber behavior, exit baselines, and failure reporting pass on Codex 0.159.2.
-- Next: configuration page runtime overlay and `/cxline` entry point.
+- Runtime configuration entry complete: `/cxline` dispatch, alternate-screen overlay lifecycle,
+  redraw handling, persistence, and backtrack isolation pass on Codex 0.159.2.
+- Next: live CxLine footer integration with the current composer state.
 
 ## Goal
 
