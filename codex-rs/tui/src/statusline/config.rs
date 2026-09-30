@@ -152,4 +152,15 @@ impl CxLineConfig {
             SegmentId::Usage => &self.segments.usage,
         }
     }
+
+    /// Return mutable configuration for an editor-selected segment.
+    pub fn get_segment_config_mut(&mut self, id: SegmentId) -> &mut SegmentItemConfig {
+        match id {
+            SegmentId::Model => &mut self.segments.model,
+            SegmentId::Directory => &mut self.segments.directory,
+            SegmentId::Git => &mut self.segments.git,
+            SegmentId::Context => &mut self.segments.context,
+            SegmentId::Usage => &mut self.segments.usage,
+        }
+    }
 }

@@ -17,7 +17,9 @@ Summary: pending
   selection preservation pass on Codex 0.159.2.
 - Color picker rendering complete: popup layout, palette selection, viewport clipping, and compact
   mode snapshots pass on Codex 0.159.2.
-- Next: configuration editor state and layout.
+- Configuration editor state complete: draft and exit baselines, theme selection, panel navigation,
+  segment ordering, and field activation pass on Codex 0.159.2.
+- Next: configuration editor rendering and layout snapshots.
 
 ## Goal
 
