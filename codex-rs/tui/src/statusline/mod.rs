@@ -7,6 +7,7 @@
 //! Git here only renders supplied data; background command execution is a later stage.
 
 mod config;
+mod icon_selector;
 mod name_input;
 mod renderer;
 mod segment;

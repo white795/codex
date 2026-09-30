@@ -11,7 +11,9 @@ Summary: pending
   rendering, and snapshots pass on Codex 0.159.2.
 - Storage and text editing complete: side-effect-free loading, atomic saves, portable theme-name
   validation, and Unicode-safe name/separator dialogs pass on Codex 0.159.2.
-- Next: icon and color picker components.
+- Icon selection complete: Plain/Nerd Font lists, per-style selection memory, custom Unicode input,
+  viewport clipping, and snapshots pass on Codex 0.159.2.
+- Next: color picker state and rendering.
 
 ## Goal
 
