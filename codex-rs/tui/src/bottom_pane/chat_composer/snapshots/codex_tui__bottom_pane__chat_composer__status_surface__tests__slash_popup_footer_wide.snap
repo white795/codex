@@ -10,9 +10,9 @@ Buffer {
         "› /memories  configure memory use and generation                                ",
         "  /mention   mention a file                                                     ",
         "  /mcp       list MCP tools; use /mcp verbose or /mcp login <name>              ",
-        "                                                                                ",
-        "› /m                                                                            ",
-        "                                                                                ",
+        "────────────────────────────────────────────────────────────────────────────────",
+        "❯ /m                                                                            ",
+        "────────────────────────────────────────────────────────────────────────────────",
         "  model · high · fast                                                           ",
     ],
     styles: [
@@ -33,7 +33,10 @@ Buffer {
         x: 4, y: 3, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
         x: 13, y: 3, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
         x: 66, y: 3, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        x: 0, y: 4, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
         x: 0, y: 5, fg: Reset, bg: Reset, underline: Reset, modifier: BOLD,
         x: 1, y: 5, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        x: 0, y: 6, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
+        x: 0, y: 7, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
     ]
 }

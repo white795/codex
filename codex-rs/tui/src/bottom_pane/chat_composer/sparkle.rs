@@ -28,6 +28,7 @@ use super::FooterMode;
 use super::InputResult;
 use crate::bottom_pane::BottomPane;
 use crate::terminal_palette::StdoutColorLevel;
+use crate::terminal_palette::default_bg;
 use crate::terminal_palette::default_fg;
 use crate::terminal_palette::effective_stdout_color_level;
 
@@ -386,7 +387,7 @@ impl ChatComposer {
         {
             return;
         }
-        let Some(foreground) = default_fg() else {
+        let (Some(foreground), Some(background)) = (default_fg(), default_bg()) else {
             return;
         };
         if since.is_none() {
@@ -411,7 +412,10 @@ impl ChatComposer {
             cursor,
             Some(protected),
             elapsed.min(fade_start),
-            foreground,
+            field::StarfieldColors {
+                foreground,
+                background,
+            },
             visibility,
             buf,
         );

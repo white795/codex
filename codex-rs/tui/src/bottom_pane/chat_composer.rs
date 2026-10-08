@@ -11,6 +11,8 @@
 //! loss cancels the pending paste; a late clipboard result cannot overwrite newer input.
 //! The live voice strip renders after effort ignition, followed by the Astra sparkle when eligible.
 //! Owned transcripts keep persistent status below the composer and hints on a separate final row.
+//! CxLine keeps the existing input geometry, drawing dim top/bottom rules without a composer fill.
+//! Its normal prompt is `❯`; shell, Max/Ultra, and Luna Reserve retain their distinct accents.
 //! Shortcut help expands above the composer, with its close hint replacing the final shortcuts row
 //! so input and persistent status stay anchored when help opens or closes.
 //! Escape dismisses visible shortcut help before editing, transcript backtracking, or interruption.
@@ -292,7 +294,6 @@ use ratatui::style::Style;
 use ratatui::style::Stylize;
 use ratatui::text::Line;
 use ratatui::text::Span;
-use ratatui::widgets::Block;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::StatefulWidgetRef;
 use ratatui::widgets::Widget;
@@ -3838,12 +3839,13 @@ impl ChatComposer {
 
     fn footer_props(&self) -> FooterProps {
         let mode = self.footer_mode();
+        // Generic composer snapshots use the non-WSL layout; explicit WSL help tests cover it.
         let is_wsl = {
-            #[cfg(target_os = "linux")]
+            #[cfg(all(target_os = "linux", not(test)))]
             {
                 mode == FooterMode::ShortcutOverlay && crate::clipboard_paste::is_probably_wsl()
             }
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(any(not(target_os = "linux"), test))]
             {
                 false
             }
@@ -4918,7 +4920,23 @@ impl ChatComposer {
             line.render(warning_area, buf);
         }
         let style = user_message_style();
-        Block::default().style(style).render(composer_rect, buf);
+        let border_style = Style::default().dim();
+        if composer_rect.height > 0 {
+            buf.set_string(
+                composer_rect.x,
+                composer_rect.y,
+                "─".repeat(composer_rect.width as usize),
+                border_style,
+            );
+        }
+        if composer_rect.height > 1 {
+            buf.set_string(
+                composer_rect.x,
+                composer_rect.bottom() - 1,
+                "─".repeat(composer_rect.width as usize),
+                border_style,
+            );
+        }
         if !remote_images_rect.is_empty() {
             Paragraph::new(self.attachments.remote_image_lines())
                 .style(style)
@@ -4930,7 +4948,7 @@ impl ChatComposer {
                     Span::from("!").light_red().bold()
                 } else if self.luna_reserve_active {
                     // Reserve keeps one arrow at every reasoning effort; only its foreground changes.
-                    "›"
+                    "❯"
                         .fg(crate::terminal_palette::best_color((246, 197, 67)))
                         .bold()
                 } else if let Some(tier) = self.effort_tier {
@@ -4941,10 +4959,10 @@ impl ChatComposer {
                         .unwrap_or(1.0);
                     tier.prompt(charge)
                 } else {
-                    "›".bold()
+                    "❯".bold()
                 }
             } else {
-                "›".dim()
+                "❯".dim()
             };
             buf.set_span(
                 textarea_rect.x - LIVE_PREFIX_COLS,
@@ -5115,7 +5133,109 @@ mod tests {
     }
 
     #[test]
-    fn light_terminal_palette_renders_light_composer_snapshot() {
+    fn cxline_composer_uses_transparent_borders_and_prompt_marker() {
+        let colors = crate::terminal_probe::DefaultColors {
+            fg: (0xee, 0xee, 0xee),
+            bg: (0x10, 0x10, 0x10),
+        };
+
+        crate::terminal_palette::with_test_default_colors(colors, || {
+            let (composer, _rx) = new_test_composer();
+            let area = Rect::new(
+                /*x*/ 0, /*y*/ 0, /*width*/ 40, /*height*/ 10,
+            );
+            let layout = composer.layout_with_options(area, ComposerRenderOptions::default());
+            let composer_rect = layout.composer;
+            let textarea_rect = layout.textarea;
+            let mut buffer = Buffer::empty(area);
+
+            composer.render(area, &mut buffer);
+
+            for y in [composer_rect.y, composer_rect.bottom().saturating_sub(1)] {
+                for x in composer_rect.x..composer_rect.right() {
+                    let cell = &buffer[(x, y)];
+                    assert_eq!(cell.symbol(), "─");
+                    assert_eq!(cell.bg, Color::Reset);
+                }
+            }
+            assert_eq!(
+                buffer[(textarea_rect.x - LIVE_PREFIX_COLS, textarea_rect.y)].symbol(),
+                "❯"
+            );
+        });
+    }
+
+    #[test]
+    fn cxline_composer_preserves_shell_effort_reserve_and_disabled_prompt_markers() {
+        for (effort, input_enabled, shell, reserve, expected) in [
+            (None, true, false, false, "❯"),
+            (Some(ReasoningEffort::XHigh), true, false, false, "❯"),
+            (Some(ReasoningEffort::Max), true, false, false, "›"),
+            (Some(ReasoningEffort::Ultra), true, false, false, "»"),
+            (Some(ReasoningEffort::Ultra), true, true, false, "!"),
+            (Some(ReasoningEffort::Max), true, false, true, "❯"),
+            (Some(ReasoningEffort::Ultra), true, false, true, "❯"),
+            (Some(ReasoningEffort::Ultra), false, false, false, "❯"),
+            (None, false, true, false, "❯"),
+        ] {
+            let (mut composer, _rx) = new_test_composer();
+            composer.set_disable_paste_burst(/*disabled*/ true);
+            composer.set_active_reasoning_effort_baseline(effort.as_ref());
+            composer.set_luna_reserve_active(reserve);
+            if shell {
+                composer.handle_key_event(KeyEvent::new(KeyCode::Char('!'), KeyModifiers::NONE));
+            }
+            composer.set_input_enabled(input_enabled, /*placeholder*/ None);
+            let area = Rect::new(0, 0, 40, 6);
+            let textarea = composer
+                .layout_with_options(area, Default::default())
+                .textarea;
+            let mut buffer = Buffer::empty(area);
+
+            composer.render(area, &mut buffer);
+
+            let prompt = &buffer[(textarea.x - LIVE_PREFIX_COLS, textarea.y)];
+            assert_eq!(prompt.symbol(), expected);
+            assert_eq!(prompt.bg, Color::Reset);
+            assert!(prompt.modifier.contains(if input_enabled {
+                Modifier::BOLD
+            } else {
+                Modifier::DIM
+            }));
+        }
+    }
+
+    #[test]
+    fn cxline_composer_borders_handle_clipped_and_offset_areas_without_changing_the_draft() {
+        for width in [0, 1, 2, 5, 40] {
+            for height in [0, 1, 2, 3, 6] {
+                let (mut composer, _rx) = new_test_composer();
+                composer.set_text_content("first\nsecond".into(), Vec::new(), Vec::new());
+                let area = Rect::new(3, 4, width, height);
+                let layout = composer.layout_with_options(area, Default::default());
+                let expected_height = composer.desired_height(width);
+                let mut buffer = Buffer::empty(area);
+
+                composer.render(area, &mut buffer);
+
+                if layout.composer.height > 0 {
+                    for y in [layout.composer.y, layout.composer.bottom() - 1] {
+                        for x in layout.composer.x..layout.composer.right() {
+                            let cell = &buffer[(x, y)];
+                            assert_eq!(cell.symbol(), "─");
+                            assert_eq!(cell.bg, Color::Reset);
+                            assert!(cell.modifier.contains(Modifier::DIM));
+                        }
+                    }
+                }
+                assert_eq!(composer.current_text(), "first\nsecond");
+                assert_eq!(composer.desired_height(width), expected_height);
+            }
+        }
+    }
+
+    #[test]
+    fn light_terminal_palette_keeps_composer_border_transparent() {
         let colors = crate::terminal_probe::DefaultColors {
             fg: (0x55, 0x57, 0x53),
             bg: (0xff, 0xff, 0xff),
@@ -5129,16 +5249,14 @@ mod tests {
             let mut buffer = Buffer::empty(area);
             composer.render(area, &mut buffer);
 
-            assert_eq!(
-                buffer[(0, 1)].bg,
-                crate::terminal_palette::rgb_color((244, 244, 244))
-            );
+            assert_eq!(buffer[(0, 0)].bg, Color::Reset);
+            assert_eq!(buffer[(0, 1)].bg, Color::Reset);
             insta::assert_snapshot!("light_terminal_palette_composer", format!("{buffer:?}"));
         });
     }
 
     #[test]
-    fn footer_hint_row_is_separated_from_composer() {
+    fn footer_hint_row_is_separated_by_composer_border() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
         let composer = ChatComposer::new(
@@ -5180,14 +5298,14 @@ mod tests {
 
         assert!(
             hint_row_idx > 0,
-            "expected a spacing row above the footer hints",
+            "expected a composer border above the footer hints",
         );
 
-        let spacing_row = row_to_string(hint_row_idx - 1);
+        let border_row = row_to_string(hint_row_idx - 1);
         assert_eq!(
-            spacing_row.trim(),
-            "",
-            "expected blank spacing row above hints but saw: {spacing_row:?}",
+            border_row,
+            "─".repeat(area.width as usize),
+            "expected composer border above hints but saw: {border_row:?}",
         );
     }
 

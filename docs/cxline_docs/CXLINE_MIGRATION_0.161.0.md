@@ -74,10 +74,20 @@ keeping the existing configuration format and preserving current upstream behavi
 - Git refresh follows the existing turn-completion and interruption entry, without changing replay
   behavior or suppressing the official terminal-title branch refresh. App events apply only the
   pending request and schedule a frame; disabling CxLine or its Git segment clears its lookup state.
-- The live footer, including Git, is connected. Composer visuals are not migrated yet, and the
-  installed version is unchanged.
-- Next: restore transparent composer borders and prompt accents, then build identity, CI, and
-  release documentation.
+- Composer visuals complete: the existing geometry now draws transparent dim top/bottom rules
+  and the normal/disabled `❯` marker. Shell `!`, official Max `›` and Ultra `»`, Luna Reserve's
+  yellow accent, effort animations, and the voice strip keep their existing precedence and behavior.
+- Astra's published transparent-cell adapter is reused: stars blend against the terminal background
+  without painting a cell background. Eligibility, protected placeholder/cursor, input cancellation,
+  redraw gating, and the original 15-second deadline are unchanged. New tests cover transparent
+  blending, prompt precedence, and clipped/offset areas without changing drafts or desired height.
+- Composer snapshots preserve 0.161.0's compact key labels, MCP login help, fullscreen Plan cycle
+  hint, and new blockquote/Vim paste scenarios. Only generic test builds skip host WSL detection;
+  explicit WSL shortcut tests remain included, and production WSL detection is unchanged.
+- Foundation, full editor UI, runtime handoff, live footer including Git, and composer visuals are
+  connected. The installed version is unchanged.
+- Next: restore build identity, deterministic version fixtures, fork CI, and maintenance/release
+  documentation before final non-test/strict/full-TUI checks and hosted release acceptance.
 
 ## Verification
 
@@ -113,12 +123,26 @@ keeping the existing configuration format and preserving current upstream behavi
 - All fourteen imported CxLine rendering snapshots passed with their original display content:
   four foundation, six UI, three live-base footer, and one Git footer snapshot. The Git snapshot
   changes only its source module path and assertion line to follow the separated Git test module.
-  Rust formatting and `git diff --check` passed; the imported Rust and migration files also
-  passed whitespace and final-newline checks. No snapshot updates were accepted.
+  No unreviewed snapshot changes were accepted at those checkpoints.
+- The composer checkpoint first confirmed the restored border test failed because the current
+  renderer still left a blank border row. After the visual port, one concentrated offline run
+  passed all 1,204 tests, with 4,561 unrelated tests skipped, using the filter
+  `test(bottom_pane::) | test(statusline) | test(cxline) | test(slash_command::tests::)`.
+  This includes all bottom-pane input/paste/Vim/history/question/effort/sparkle tests plus the
+  CxLine regression subset. Four visual cases are restored or added; snapshots run with
+  `INSTA_UPDATE=no`, so the passing run neither accepts updates nor leaves pending snapshot files.
+- Reviewed 137 composer-related visual snapshots: 112 reuse the published display content against
+  an unchanged official baseline, 21 combine that visual delta with current upstream changes,
+  and four retain new 0.161.0 scenarios with only borders/prompt updated. The overlapping MCP
+  popup snapshot keeps the new help text and its style boundary. Header metadata is retained;
+  upstream input behavior and unrelated snapshots are not replaced.
+- Rust formatting and source/document whitespace and final-newline checks passed. Difference
+  checks exclude `.snap` files from normal trailing-whitespace rules; those fixed-width rendering
+  grids are checked separately with `core.whitespace=-blank-at-eol`, preserving meaningful padding.
 - The runtime-editor test build and execution completed without warnings. `load_saved` now has
-  runtime callers. Strict Clippy, non-test checking, full TUI regression, composer visuals,
-  manual terminal acceptance, hosted CI, and release checks remain for later stages. The Git
-  checkpoint completed without compiler warnings and did not repeat its passing test run.
+  runtime callers. Strict Clippy, non-test checking, full TUI regression, manual terminal acceptance,
+  hosted CI, and release checks remain for later stages. The Git and composer checkpoints completed
+  without compiler warnings and did not repeat their passing test runs.
 - No local release build, active configuration change, installation change, or Git write occurred.
 
 ## Acceptance
@@ -147,6 +171,9 @@ keeping the existing configuration format and preserving current upstream behavi
 - Keep Git collection outside rendering, with the existing 5-second timeout, 64 KiB output cap,
   `GIT_OPTIONAL_LOCKS=0`, and both cwd/request guards. The shared branch-refresh entry must keep
   running the official terminal-title path after requesting a CxLine refresh.
+- Reapply visual snapshot deltas against current upstream content rather than copying old
+  full-screen snapshots wholesale. Keep transparent Astra blending separate from eligibility and
+  scheduling, and keep Max/Ultra glyphs on the official effort renderer.
 - Keep source-build test version and WSL shortcut fixtures deterministic without changing
   production version, platform detection, configuration, or daemon settings.
 - Legacy UI limits remain unchanged: Options editing is unsupported, segment reordering only

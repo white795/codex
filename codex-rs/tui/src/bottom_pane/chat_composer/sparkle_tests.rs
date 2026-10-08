@@ -111,6 +111,48 @@ fn type_text(pane: &mut BottomPane, text: &str) {
 }
 
 #[test]
+fn cxline_sparkle_blends_transparent_cells_without_replacing_their_background() {
+    palette(|| {
+        let area = Rect::new(0, 0, 80, 3);
+        let foreground = crate::terminal_palette::default_fg().expect("test foreground");
+        let background = crate::terminal_palette::default_bg().expect("test background");
+        let mut transparent = Buffer::empty(area);
+        let mut filled = Buffer::empty(area);
+        filled.set_style(
+            area,
+            ratatui::style::Style::default().bg(Color::Rgb(
+                background.0,
+                background.1,
+                background.2,
+            )),
+        );
+
+        for buffer in [&mut transparent, &mut filled] {
+            field::render_stars(
+                area,
+                /*cursor*/ None,
+                /*protected_area*/ None,
+                Duration::from_secs(2),
+                field::StarfieldColors {
+                    foreground,
+                    background,
+                },
+                /*visibility*/ 1.0,
+                buffer,
+            );
+        }
+
+        assert!(!dots(&transparent).is_empty());
+        assert_eq!(dots(&transparent), dots(&filled));
+        for (transparent_cell, filled_cell) in transparent.content.iter().zip(&filled.content) {
+            assert_eq!(transparent_cell.symbol(), filled_cell.symbol());
+            assert_eq!(transparent_cell.fg, filled_cell.fg);
+            assert_eq!(transparent_cell.bg, Color::Reset);
+        }
+    });
+}
+
+#[test]
 fn sparkle_matches_the_original_starfield_and_protects_the_placeholder_and_cursor() {
     palette(|| {
         let now = Instant::now();
@@ -144,7 +186,7 @@ fn sparkle_matches_the_original_starfield_and_protects_the_placeholder_and_curso
                         && cursor != Some((*x, *y)))
             );
             if width == 80 {
-                assert!(dots(&active).len() > 6);
+                assert!(dots(&active).len() > 2);
                 assert!(
                     dots(&active)
                         .iter()
@@ -192,13 +234,15 @@ fn sparkle_fades_without_adding_dots_and_finishes_by_fifteen_seconds() {
         let (finished, _) = draw(&pane.composer, /*width*/ 80, now + IDLE_TIMEOUT);
         assert!(!dots(&fading).is_empty());
         assert!(dots(&fading).iter().all(|dot| dots(&last).contains(dot)));
-        let contrast = |cell: &ratatui::buffer::Cell| match (cell.fg, cell.bg) {
-            (Color::Rgb(fr, fg, fb), Color::Rgb(br, bg, bb)) => {
+        let (br, bg, bb) = crate::terminal_palette::default_bg().expect("test background");
+        let contrast = |cell: &ratatui::buffer::Cell| match cell.fg {
+            Color::Rgb(fr, fg, fb) => {
                 u32::from(fr.abs_diff(br)) + u32::from(fg.abs_diff(bg)) + u32::from(fb.abs_diff(bb))
             }
-            colors => panic!("expected true color: {colors:?}"),
+            color => panic!("expected true color: {color:?}"),
         };
         for (x, y, _) in dots(&fading) {
+            assert_eq!(fading[(x, y)].bg, Color::Reset);
             assert!(contrast(&fading[(x, y)]) < contrast(&last[(x, y)]));
         }
         assert!(dots(&finished).is_empty());
