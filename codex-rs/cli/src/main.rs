@@ -112,8 +112,9 @@ use codex_terminal_detection::TerminalName;
 /// If no subcommand is specified, options will be forwarded to the interactive CLI.
 #[derive(Debug, Parser)]
 #[clap(
+    name = "codex-cxline",
     author,
-    version,
+    version = codex_tui::CODEX_BUILD_VERSION,
     // If a sub‑command is given, ignore requirements of the default args.
     subcommand_negates_reqs = true,
     // The executable is sometimes invoked via a platform‑specific name like
