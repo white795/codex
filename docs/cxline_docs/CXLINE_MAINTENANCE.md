@@ -3,12 +3,12 @@
 This repository keeps the upstream-compatible Codex version in Cargo metadata and adds a
 separate user-visible CxLine revision. It is intentionally maintained for WSL/Linux x86_64 only.
 
-The current published release is
-[0.159.2+cxline.1](https://github.com/white795/codex/releases/tag/cxline-v0.159.2.1), tagged at
-`4582156b97a60b92af29de2628dedd8a93f1249b`. The next release candidate is
-`0.159.2+cxline.2` on `cxline/0.159.2`; it restores the transparent bordered composer and adds the
-effective Fast-mode state to the CxLine model segment. See the active
-[0.159.2 migration record](CXLINE_MIGRATION_0.159.2.md). The
+The current published and locally adopted release is
+[0.159.2+cxline.2](https://github.com/white795/codex/releases/tag/cxline-v0.159.2.2), tagged at
+`be99489eaeaaab6a0e3cef2bbca69a1b67a01e10`. It restores the transparent bordered composer and
+adds the effective Fast-mode state to the CxLine model segment. See the completed
+[0.159.2 release handoff](CXLINE_RELEASE_0.159.2.md) and archived
+[migration record](CXLINE_MIGRATION_0.159.2.md). The
 [0.155.1 handoff](CXLINE_RELEASE_0.155.1.md) and
 [first-release handoff](CXLINE_RELEASE_0.154.0.md) retain earlier customization decisions and
 limitations.
@@ -16,9 +16,9 @@ limitations.
 ## Version convention
 
 - Upstream compatibility version: `0.159.2`
-- Published CxLine display version: `0.159.2+cxline.1`
-- Next CxLine display version: `0.159.2+cxline.2`
-- Next release tag: `cxline-v0.159.2.2`
+- Current CxLine display version: `0.159.2+cxline.2`
+- Current release tag: `cxline-v0.159.2.2`
+- Next upstream target: not selected
 
 The release workflow rejects a tag when its upstream portion differs from
 `codex-rs/Cargo.toml`, or when the built binary does not report the matching CxLine revision.
@@ -33,7 +33,7 @@ upstream source snapshots even when the maintenance branch starts from a version
 
 ## Branch and CI strategy
 
-### Follow-up release candidate: 0.159.2+cxline.2
+### Completed release: 0.159.2+cxline.2
 
 The `cxline/0.159.2` branch reapplies the maintained customization onto `rust-v0.159.2`
 (`ff6aec96948b70d94983af2641a6b67c94faeff5`). It keeps the full CxLine configuration UI,
@@ -42,12 +42,14 @@ composer/input visuals. Missing or disabled CxLine configuration preserves the o
 line. No reasoning translation, CJK cursor patch, thread-deletion patch or new Cometix feature is
 included.
 
-The published `.1` candidate completed formatting, a locked CLI check, strict TUI Clippy, and the
-deterministic TUI suite before tagging. The `.2` follow-up keeps the same upstream base and adds two
-user-visible refinements: the composer again uses a transparent background with horizontal borders
-and a `❯` prompt, and CxLine renders an effective Fast state as
-`<model> · <reasoning> fast`. Its release-preparation commit must receive a new green branch CI
-before it becomes the tagged release commit.
+The `.1` candidate completed the initial migration. The accepted `.2` follow-up keeps the same
+upstream base and adds two user-visible refinements: the composer again uses a transparent
+background with horizontal borders and a normal `❯` prompt, and CxLine renders an effective Fast
+state as `<model> · <reasoning> fast`. The official Max `›` and Ultra `»` prompt accents remain
+unchanged. The exact `.2` tag commit passed
+[branch CI](https://github.com/white795/codex/actions/runs/37741875025), and its
+[release workflow](https://github.com/white795/codex/actions/runs/37746114670) published the
+complete package successfully.
 
 ### Workflow policy
 
@@ -61,32 +63,34 @@ before it becomes the tagged release commit.
   this fork's release gate.
 
 The release workflow is absent from the default `main`, so GitHub may not expose its manual
-`workflow_dispatch` entry. Preserve `main` rather than copying fork workflows into it. Use a local
-release-candidate build before tagging, or let the tag-triggered build be the first hosted release
-build after all other checks pass.
+`workflow_dispatch` entry. Preserve `main` rather than copying fork workflows into it. The normal
+personal workflow is green branch CI followed by a tag push; the tag-triggered workflow performs
+the release build, package verification, and publication. A local release-profile build is optional
+diagnostic work and should run only when explicitly needed.
 
 ## Release checklist
 
-1. Confirm `cxline-ci` is green for the exact commit that will receive the tag.
-2. Build the WSL/Linux release candidate with two Cargo jobs, matching the hosted workflow.
-3. Verify the complete package reports `codex-cxline 0.159.2+cxline.2` and contains `codex`,
-   `codex-code-mode-host`, `bwrap`, `rg`, the pinned zsh resource, and its package manifest.
-4. With an isolated `CODEX_HOME`, check startup, normal prompting, `/cxline`, save-and-switch,
-   restart persistence, Chinese/emoji input, paste, multiline input, and `/daemon` using the
-   complete package.
-5. Back up the active configuration, then test the same candidate with the existing `.codex`.
-6. Tag the same tested commit and push the tag:
+1. Select the upstream version and CxLine revision, update `CODEX_BUILD_VERSION`, and confirm the
+   tag, binary identity, Cargo version, and documentation all agree.
+2. Confirm `cxline-ci` is green for the exact commit that will receive the tag.
+3. Create an annotated `cxline-v<upstream-version>.<revision>` tag on that commit and push only the
+   new tag. For example, the completed 0.159.2 follow-up used:
 
    ```bash
    git tag -a cxline-v0.159.2.2 -m "Release Codex CxLine 0.159.2+cxline.2"
    git push origin cxline-v0.159.2.2
    ```
 
-7. Confirm the tag-triggered build and GitHub Release succeed. Download `SHA256SUMS` with the
-   complete archive and verify it before installation.
-8. Add `CXLINE_RELEASE_0.159.2.md` only after `.2` publication, recording both 0.159.2 revisions,
-   the released commit, Actions run, artifact verification, installation result and remaining
-   limitations.
+4. Confirm the tag-triggered workflow validates the tag, builds the WSL/Linux package, and publishes
+   the GitHub Release successfully.
+5. Download `SHA256SUMS` with the complete archive and verify the archive before extraction.
+6. With an isolated `CODEX_HOME`, verify the package version and required `codex`,
+   `codex-code-mode-host`, `bwrap`, `rg`, zsh, and manifest files. Then check startup, `/cxline`,
+   save-and-switch, input behavior, Fast display, and `/daemon` as relevant to the change.
+7. Back up the active configuration, install into a new immutable version directory, test with the
+   existing `.codex`, and repoint `current` only after acceptance. Keep the previous directory.
+8. Add or update the release handoff only after publication. Record the immutable commit and tag,
+   Actions runs, checksum, installation result, manual acceptance, and known limitations.
 
 Git writes, tags and pushes remain manual operations performed by the repository maintainer.
 Never move or recreate a published release tag. A documentation-only archival commit after
@@ -117,28 +121,37 @@ layout or bundled tools.
   remain errors while the unrelated dependency warning does not fail the job.
 - Do not update snapshots merely because `codex-rs/Cargo.toml` contains a release version. TUI
   tests use the source-build fixture `0.0.0`; production builds still use `0.159.2`.
+- When changing composer visuals, exercise normal, disabled, Bash, Luna Reserve, Max, and Ultra
+  prompt paths. Upstream effort-tier rendering can override the normal prompt glyph.
+- Derive Fast display from the same effective predicate as the official status line; do not infer
+  it independently from raw configuration or the requested service tier.
 
 ## Updating from upstream
 
 For each selected stable upstream tag:
 
-1. Update local `main` from `upstream` and verify the unmodified upstream baseline.
-2. Create `cxline/<new-version>` from the selected `rust-v<new-version>` tag.
+1. Select a stable upstream release, update local `main` from `upstream`, and verify the unmodified
+   tag before beginning customization work.
+2. Create `cxline/<new-version>` from the selected `rust-v<new-version>` tag. Do not merge that
+   upstream release into the previous customization branch.
 3. Review the previous customization range, then reapply small commits in functional order:
    statusline core, configuration UI, runtime entry, live base data, rate limits, asynchronous Git,
    input visuals, build identity, fork CI, and maintenance documentation.
-4. Resolve against current TUI APIs instead of copying old central files wholesale. Check whether
+4. Resolve against current TUI APIs instead of copying old central files wholesale. Treat App,
+   ChatWidget, composer, footer, daemon, version, and event wiring as high-churn seams. Check whether
    upstream or Cometix already provides a better implementation, but merge neither source blindly.
 5. Keep Cargo and protocol versions at the upstream value. Reset the CxLine revision to `1`, and
    verify production display identity separately from test-only source identity.
 6. Run focused tests as each stage lands, then one hosted branch quality gate on the final
    candidate. Recheck official status-line behavior with CxLine disabled.
-7. Build and test the complete package before tagging. Install into a new version directory and
-   keep the previous directory for rollback.
+7. After green branch CI, use the hosted tag workflow for the normal release. Build locally only
+   when diagnosing packaging or when explicit pre-tag verification is desired. Verify the published
+   complete archive before installing it into a new version directory.
 
-The published `.1` customization review range is `rust-v0.159.2..cxline-v0.159.2.1`. Review the
-same-base follow-up as `cxline-v0.159.2.1..HEAD`; after `.2` publication, replace `HEAD` with the
-immutable `cxline-v0.159.2.2` tag in the release handoff.
+The complete published 0.159.2 customization range is
+`rust-v0.159.2..cxline-v0.159.2.2`. The `.2` follow-up alone is
+`cxline-v0.159.2.1..cxline-v0.159.2.2`. See the release handoff for the commit sequence and lessons
+to carry into the next upstream migration.
 
 ## Personal installation and rollback
 

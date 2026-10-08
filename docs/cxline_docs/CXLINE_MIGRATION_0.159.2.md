@@ -1,9 +1,9 @@
 # CxLine migration to Codex 0.159.2
 
-- Status: `0.159.2+cxline.2` release preparation
+- Status: complete and archived on 2026-10-08
 - Base: `rust-v0.159.2` (`ff6aec96948b70d94983af2641a6b67c94faeff5`)
 - Target branch: `cxline/0.159.2`
-- Summary: `0.159.2+cxline.1` published; `.2` validation and publication pending
+- Summary: [0.159.2 release handoff](CXLINE_RELEASE_0.159.2.md)
 
 ## Progress
 
@@ -49,11 +49,17 @@
 - The `.2` follow-up implementation landed in `0ade5fb25`: it restores the transparent composer,
   horizontal borders and `❯` prompt; preserves Astra sparkles on transparent cells; and appends
   `fast` to the CxLine model segment only when the official effective Fast-state predicate is true.
-- The `.2` build identity is prepared as `0.159.2+cxline.2` without changing the upstream
+- The `.2` build identity was finalized as `0.159.2+cxline.2` without changing the upstream
   compatibility version used by update checks and protocol metadata.
-- Next: commit and push the `.2` release preparation, require a green branch CI, build and inspect
-  the complete package, run isolated and existing-config WSL checks, then publish
-  `cxline-v0.159.2.2`.
+- The `.2` tag commit passed
+  [branch CI](https://github.com/white795/codex/actions/runs/37741875025), and the
+  [release workflow](https://github.com/white795/codex/actions/runs/37746114670) published
+  `cxline-v0.159.2.2` successfully.
+- The downloaded archive matched `SHA256SUMS`, reported `0.159.2+cxline.2`, contained the complete
+  package layout, and was installed under the versioned WSL directory. `current`, `codex`, and `cx`
+  now resolve to `.2`; `.1` remains available for rollback.
+- Manual acceptance confirmed the transparent borders and Fast display. Max `›` and Ultra `»` are
+  retained official effort-tier prompt glyphs; the normal prompt remains `❯`.
 
 ## Goal
 
@@ -65,8 +71,8 @@ visuals on top of the official Codex 0.159.2 release while preserving upstream b
 - Keep the CxLine configuration format under `$CODEX_HOME/cxline` compatible with the 0.155.1
   custom release.
 - Keep `/cxline`, live preview, theme editing, persistence, and runtime footer switching.
-- Keep the selected composer/input visuals, including the transparent bordered composer and `❯`
-  prompt.
+- Keep the selected composer/input visuals, including the transparent bordered composer and normal
+  `❯` prompt, while retaining official Max/Ultra prompt accents.
 - Show the official effective Fast-mode state in CxLine without changing service-tier resolution.
 - Keep the WSL/Linux x86_64 CI and release path and use the `+cxline.2` build identity for this
   follow-up release.
@@ -83,8 +89,8 @@ visuals on top of the official Codex 0.159.2 release while preserving upstream b
 6. Restore the composer visuals lost during the 0.159.2 migration and expose effective Fast mode in
    the CxLine model segment.
 
-Tasks 1–5 completed for the published `.1` release. Task 6 is implemented and locally verified for
-`.2`; hosted CI, release packaging, manual WSL validation and publication remain open.
+Tasks 1–5 completed for the published `.1` release. Task 6 and all hosted CI, release packaging,
+checksum, installation, and representative WSL acceptance work completed for `.2`.
 
 ## Acceptance
 
@@ -93,8 +99,8 @@ Tasks 1–5 completed for the published `.1` release. Task 6 is implemented and 
 - Existing CxLine themes and custom TOML configuration still load and render correctly.
 - Official 0.159.2 status surfaces and terminal-title behavior remain intact when CxLine is inactive.
 - Fast-capable sessions render `<model> · <reasoning> fast`; other sessions omit `fast`.
-- The composer uses a transparent background, horizontal top and bottom borders, and the `❯`
-  prompt without breaking Astra sparkles.
+- The composer uses a transparent background, horizontal top and bottom borders, and the normal
+  `❯` prompt without breaking Astra sparkles or official Max/Ultra accents.
 - The branch builds and its scoped automated checks pass before release packaging.
 
 ## Risks / dependencies
