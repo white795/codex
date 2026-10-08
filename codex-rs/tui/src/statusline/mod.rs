@@ -1,4 +1,4 @@
-//! CxLine configuration, storage, and pure footer rendering.
+//! CxLine configuration, editing, storage, and pure footer rendering.
 //!
 //! Derived from Haleclipse/codex, rust-v0.144.3-cometix,
 //! commit c5dce3cbd3914c6a3402fb00b2ee9d4df988b0a6 (Apache-2.0).
@@ -6,10 +6,15 @@
 //! Filesystem access is separate from defaults and rendering. Rendering only consumes supplied
 //! data; it never probes Git or initializes configuration files.
 
+mod color_picker;
 mod config;
+mod editor;
+mod icon_selector;
+mod name_input;
 mod renderer;
 mod segment;
 mod segments;
+mod separator_editor;
 mod storage;
 mod style;
 mod themes;
@@ -28,6 +33,10 @@ mod tests;
 #[cfg(test)]
 #[path = "storage_tests.rs"]
 mod storage_tests;
+
+#[cfg(test)]
+#[path = "text_editor_tests.rs"]
+mod text_editor_tests;
 
 /// Git 预览数据（用于配置页预览）
 #[derive(Debug, Clone, PartialEq, Eq)]

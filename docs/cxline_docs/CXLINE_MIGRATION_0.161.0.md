@@ -42,14 +42,20 @@ keeping the existing configuration format and preserving current upstream behavi
 - Foundation and storage complete: legacy TOML, nine themes, five segments, pure rendering,
   safe saves, and explicit saved-config loading pass the focused suite on 0.161.0.
   The model segment retains effective Fast-state input and the accepted reasoning spacing.
-  They remain test-only until runtime integration; `/cxline` is not available yet.
-- Next: port text, icon, color, and configuration editors before runtime wiring.
+- Configuration UI complete internally: Unicode name/separator dialogs, emoji/Nerd Font icons,
+  16/256-color and RGB/HEX selection, preview, panel navigation, child-dialog routing, theme
+  switching/reset, save/write/save-as, and exit baselines pass the focused suite on 0.161.0.
+  All 21 UI files are reused unchanged from the published 0.159.2 customization.
+- The modules remain test-only until runtime integration; `/cxline` is not available yet.
+- Next: adapt the overlay and `/cxline` dispatch, then live footer data, Git probes, and input
+  visuals against the current App, ChatWidget, and composer APIs.
 
 ## Verification
 
 - Locked Linux dependency resolution passed after downloading uncached upstream dependencies.
-- The focused suite passed 32 tests, with 5,633 unrelated tests skipped. This behavior-preserving
-  port reuses the existing regression tests and adds a Fast-display matrix for model/effort data.
+- The foundation checkpoint passed 32 tests. With the 50 restored UI tests, the focused suite
+  now passes 82 tests, with 5,633 unrelated tests skipped. This behavior-preserving port reuses
+  the existing regression tests and adds a Fast-display matrix for model/effort data.
   Run from the repository root with Cargo and just on PATH:
 
   ```bash
@@ -59,11 +65,12 @@ keeping the existing configuration format and preserving current upstream behavi
     -E 'test(statusline)' --test-threads 1 --retries 0 --failure-output final --status-level fail
   ```
 
-- All four imported rendering snapshots passed unchanged. Rust formatting and `git diff --check`
-  passed; the imported Rust and migration files also passed whitespace and final-newline checks.
+- All ten imported rendering snapshots passed unchanged: four foundation and six UI snapshots.
+  Rust formatting and `git diff --check` passed; the imported Rust and migration files also
+  passed whitespace and final-newline checks. No snapshot updates were accepted.
 - Strict Clippy, full TUI regression, runtime behavior, hosted CI, and release checks remain for
-  later stages. Unused editor/runtime helpers (`load_saved`, `get_segment_config_mut`, and
-  `THEME_NAMES`) currently produce two warnings while those callers are not yet ported.
+  later stages. Only the saved-config runtime entry `load_saved` remains unused and produces
+  one warning until runtime wiring is ported; editor helpers are now exercised by the UI tests.
 - No local release build, active configuration change, installation change, or Git write occurred.
 
 ## Acceptance
@@ -86,4 +93,6 @@ keeping the existing configuration format and preserving current upstream behavi
   Preserve those paths and derive Fast mode from the current official predicate.
 - Keep source-build test version and WSL shortcut fixtures deterministic without changing
   production version, platform detection, configuration, or daemon settings.
+- Legacy UI limits remain unchanged: Options editing is unsupported, segment reordering only
+  changes the preview order, and theme-name input keeps its 32-byte length guard.
 - New upstream dependencies may require cache downloads before locked tests can run.
