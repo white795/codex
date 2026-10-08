@@ -1,5 +1,11 @@
 /// The current Codex CLI version as embedded at compile time.
+#[cfg(not(test))]
 pub const CODEX_CLI_VERSION: &str = env!("CARGO_PKG_VERSION");
+
+/// Unit tests model an upstream source checkout so snapshots do not depend on
+/// the release tag used as the branch base.
+#[cfg(test)]
+pub const CODEX_CLI_VERSION: &str = "0.0.0";
 
 /// User-visible identity for this CxLine build of the upstream Codex version.
 ///
