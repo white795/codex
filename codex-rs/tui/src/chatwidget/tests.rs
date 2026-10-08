@@ -247,6 +247,8 @@ mod config_errors;
 mod copy_export_picker_tests;
 #[path = "tests/cxline_command_tests.rs"]
 mod cxline_command_tests;
+#[path = "tests/cxline_git_tests.rs"]
+mod cxline_git_tests;
 #[path = "tests/cxline_runtime_tests.rs"]
 mod cxline_runtime_tests;
 #[path = "tests/dynamic_activity_tests.rs"]

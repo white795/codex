@@ -1545,6 +1545,13 @@ pub(crate) enum AppEvent {
     /// Open the CxLine appearance editor in the alternate screen.
     OpenCxlineConfig,
 
+    /// Async CxLine Git metadata, scoped to both cwd and lookup identity.
+    CxLineGitPreviewUpdated {
+        request_id: Uuid,
+        cwd: PathBuf,
+        preview: Option<crate::statusline::GitPreviewData>,
+    },
+
     /// Async update of the current git branch for status line rendering.
     StatusLineBranchUpdated {
         cwd: PathBuf,

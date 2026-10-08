@@ -2,16 +2,20 @@
 //!
 //! The configuration UI edits its own draft; only its exit baseline is returned to the widget.
 //! Theme fallback alone must not opt a session into CxLine before a main configuration is saved.
+//! Git lookups are asynchronous and cached; cwd and request identity reject stale completions.
 
 use std::path::Path;
+use std::path::PathBuf;
 
 use super::ChatWidget;
 use super::status_surfaces::five_hour_status_window;
 use super::status_surfaces::weekly_status_window;
 use crate::statusline::CxLineConfig;
+use crate::statusline::GitPreviewData;
 use crate::statusline::StatusLineContext;
 use crate::statusline::build_statusline;
 use codex_protocol::openai_models::SPEED_TIER_FAST;
+use uuid::Uuid;
 
 #[derive(Default)]
 struct CxLineRateLimits {
@@ -20,9 +24,18 @@ struct CxLineRateLimits {
     weekly_resets_at: Option<String>,
 }
 
+#[derive(Default)]
+struct CxLineGitState {
+    cwd: Option<PathBuf>,
+    preview: Option<GitPreviewData>,
+    pending_request_id: Option<Uuid>,
+    lookup_complete: bool,
+}
+
 pub(super) struct CxLineRuntime {
     config: CxLineConfig,
     has_saved_config: bool,
+    git: CxLineGitState,
 }
 
 impl CxLineRuntime {
@@ -31,6 +44,7 @@ impl CxLineRuntime {
             Ok(Some(config)) => Self {
                 config,
                 has_saved_config: true,
+                git: CxLineGitState::default(),
             },
             Ok(None) => Self {
                 config: CxLineConfig::load(codex_home).unwrap_or_else(|error| {
@@ -38,12 +52,14 @@ impl CxLineRuntime {
                     CxLineConfig::default()
                 }),
                 has_saved_config: false,
+                git: CxLineGitState::default(),
             },
             Err(error) => {
                 tracing::warn!(%error, "Failed to load saved CxLine configuration; using official status line");
                 Self {
                     config: CxLineConfig::default(),
                     has_saved_config: false,
+                    git: CxLineGitState::default(),
                 }
             }
         }
@@ -65,6 +81,74 @@ impl CxLineRuntime {
             self.has_saved_config = true;
         }
     }
+
+    fn git_segment_enabled(&self) -> bool {
+        self.enabled_config()
+            .is_some_and(|config| config.segments.git.enabled)
+    }
+
+    fn sync_git_cwd(&mut self, cwd: &Path) {
+        if self.git.cwd.as_deref() == Some(cwd) {
+            return;
+        }
+        self.git.cwd = Some(cwd.to_path_buf());
+        self.git.preview = None;
+        self.git.pending_request_id = None;
+        self.git.lookup_complete = false;
+    }
+
+    fn begin_git_lookup(&mut self, cwd: &Path) -> Option<Uuid> {
+        self.sync_git_cwd(cwd);
+        if self.git.pending_request_id.is_some() || self.git.lookup_complete {
+            return None;
+        }
+        let request_id = Uuid::new_v4();
+        self.git.pending_request_id = Some(request_id);
+        Some(request_id)
+    }
+
+    fn invalidate_git_lookup(&mut self, cwd: &Path) {
+        self.sync_git_cwd(cwd);
+        self.git.pending_request_id = None;
+        self.git.lookup_complete = false;
+    }
+
+    fn complete_git_without_runner(&mut self, cwd: &Path) {
+        self.sync_git_cwd(cwd);
+        self.git.preview = None;
+        self.git.pending_request_id = None;
+        self.git.lookup_complete = true;
+    }
+
+    fn clear_git(&mut self) {
+        self.git.cwd = None;
+        self.git.preview = None;
+        self.git.pending_request_id = None;
+        self.git.lookup_complete = false;
+    }
+
+    fn apply_git_preview(
+        &mut self,
+        request_id: Uuid,
+        cwd: &Path,
+        preview: Option<GitPreviewData>,
+    ) -> bool {
+        if self.git.cwd.as_deref() != Some(cwd) || self.git.pending_request_id != Some(request_id) {
+            return false;
+        }
+        self.git.preview = preview;
+        self.git.pending_request_id = None;
+        self.git.lookup_complete = true;
+        true
+    }
+
+    fn git_preview(&self, cwd: &Path) -> Option<&GitPreviewData> {
+        if self.git.cwd.as_deref() == Some(cwd) {
+            self.git.preview.as_ref()
+        } else {
+            None
+        }
+    }
 }
 
 impl ChatWidget {
@@ -83,10 +167,16 @@ impl ChatWidget {
     }
 
     pub(super) fn refresh_cxline_status_line(&mut self) -> bool {
-        let Some(config) = self.cxline_runtime.enabled_config() else {
+        if !self.cxline_enabled() {
+            self.cxline_runtime.clear_git();
             return false;
-        };
+        }
         let cwd = self.status_line_cwd().to_path_buf();
+        if self.cxline_runtime.git_segment_enabled() {
+            self.ensure_cxline_git_preview(&cwd);
+        } else {
+            self.cxline_runtime.clear_git();
+        }
         let rate_limits = self.cxline_rate_limits();
         let (used_tokens, window_size) =
             self.token_info
@@ -118,11 +208,67 @@ impl ChatWidget {
         if fast_mode_active {
             context = context.with_fast_mode_active();
         }
+        if let Some(preview) = self.cxline_runtime.git_preview(&cwd) {
+            context = context.with_git_preview(
+                &preview.branch,
+                &preview.status,
+                preview.ahead,
+                preview.behind,
+            );
+        }
+        let Some(config) = self.cxline_runtime.enabled_config() else {
+            return false;
+        };
         let line = build_statusline(config, &context).render_line();
 
         self.bottom_pane.set_status_line_enabled(/*enabled*/ true);
         self.set_status_line(Some(line));
         self.set_status_line_hyperlink(/*url*/ None);
+        true
+    }
+
+    fn ensure_cxline_git_preview(&mut self, cwd: &Path) {
+        let Some(runner) = self.workspace_command_runner.clone() else {
+            self.cxline_runtime.complete_git_without_runner(cwd);
+            return;
+        };
+        let Some(request_id) = self.cxline_runtime.begin_git_lookup(cwd) else {
+            return;
+        };
+        let cwd = cwd.to_path_buf();
+        let tx = self.app_event_tx.clone();
+        tokio::spawn(async move {
+            let preview = crate::statusline::collect_git_preview(runner.as_ref(), &cwd).await;
+            tx.send(crate::app_event::AppEvent::CxLineGitPreviewUpdated {
+                request_id,
+                cwd,
+                preview,
+            });
+        });
+    }
+
+    pub(super) fn request_cxline_git_preview_refresh(&mut self) {
+        if !self.cxline_runtime.git_segment_enabled() {
+            return;
+        }
+        let cwd = self.status_line_cwd().to_path_buf();
+        self.cxline_runtime.invalidate_git_lookup(&cwd);
+        self.ensure_cxline_git_preview(&cwd);
+    }
+
+    pub(crate) fn set_cxline_git_preview(
+        &mut self,
+        request_id: Uuid,
+        cwd: PathBuf,
+        preview: Option<GitPreviewData>,
+    ) -> bool {
+        if !self
+            .cxline_runtime
+            .apply_git_preview(request_id, &cwd, preview)
+        {
+            return false;
+        }
+        self.refresh_status_surfaces();
         true
     }
 

@@ -437,6 +437,9 @@ impl ChatWidget {
     }
 
     pub(super) fn request_status_line_branch_refresh(&mut self) {
+        if self.cxline_enabled() {
+            self.request_cxline_git_preview_refresh();
+        }
         let selections = self.status_surface_selections();
         if !selections.uses_git_branch() {
             return;

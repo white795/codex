@@ -9,6 +9,7 @@
 mod color_picker;
 mod config;
 mod editor;
+mod git_preview;
 mod icon_selector;
 mod name_input;
 mod overlay;
@@ -22,6 +23,7 @@ mod themes;
 
 use codex_protocol::openai_models::ReasoningEffort;
 pub(crate) use config::CxLineConfig;
+pub(crate) use git_preview::collect_git_preview;
 pub(crate) use overlay::CxLineOverlay;
 use renderer::StatusLineRenderer;
 use segment::Segment;
@@ -37,6 +39,10 @@ mod tests;
 mod storage_tests;
 
 #[cfg(test)]
+#[path = "git_preview_tests.rs"]
+mod git_preview_tests;
+
+#[cfg(test)]
 #[path = "text_editor_tests.rs"]
 mod text_editor_tests;
 
@@ -44,7 +50,7 @@ mod text_editor_tests;
 #[path = "overlay_tests.rs"]
 mod overlay_tests;
 
-/// Git 预览数据（用于配置页预览）
+/// Git 数据（用于配置页预览和异步运行时查询）
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct GitPreviewData {
     pub branch: String,
