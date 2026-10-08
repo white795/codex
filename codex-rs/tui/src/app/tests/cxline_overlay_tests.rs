@@ -48,6 +48,7 @@ async fn cxline_escape_closes_the_editor_without_starting_backtrack_preview() ->
 #[tokio::test]
 async fn saving_and_closing_cxline_retains_the_configuration_for_reopen() -> Result<()> {
     let mut app = make_test_app().await;
+    let official_line = app.chat_widget.status_line_text();
     let mut server = start_config_write_test_app_server(&app).await?;
     let mut tui = crate::tui::test_support::make_test_tui()?;
     tui.set_alt_screen_enabled(/*enabled*/ false);
@@ -65,6 +66,13 @@ async fn saving_and_closing_cxline_retains_the_configuration_for_reopen() -> Res
         Some(config.clone())
     );
     assert!(app.overlay.is_none());
+
+    let cxline = app
+        .chat_widget
+        .status_line_text()
+        .expect("saved CxLine footer");
+    assert_ne!(Some(cxline.clone()), official_line);
+    assert!(cxline.contains("- · - tokens"));
 
     app.handle_event(&mut tui, &mut server, AppEvent::OpenCxlineConfig)
         .await?;
@@ -125,4 +133,32 @@ async fn cxline_close_restores_the_composer_in_inline_and_owned_sessions() -> Re
     tui.set_owned_screen(/*owned*/ false)?;
     server.shutdown().await?;
     Ok(())
+}
+
+#[tokio::test]
+async fn cxline_token_notification_refreshes_the_live_footer_through_app_routing() {
+    let mut app = make_test_app().await;
+    let thread_id = ThreadId::new();
+    app.chat_widget
+        .handle_thread_session(test_thread_session(thread_id, app.config.cwd.to_path_buf()));
+    let config = crate::statusline::CxLineConfig::default();
+    let root = app.local_settings.codex_home.join("cxline");
+    std::fs::create_dir(&root).expect("CxLine directory");
+    std::fs::write(
+        root.join("config.toml"),
+        toml::to_string_pretty(&config).expect("serialize CxLine configuration"),
+    )
+    .expect("saved CxLine configuration");
+    app.chat_widget.apply_cxline_editor_config(config);
+
+    app.handle_thread_event_now(ThreadBufferedEvent::Notification(Box::new(
+        token_usage_notification(thread_id, "turn-1", Some(100)),
+    )));
+
+    let line = app
+        .chat_widget
+        .status_line_text()
+        .expect("live CxLine footer");
+    assert!(line.contains("10% · 10 tokens"));
+    assert!(!line.contains("- · - tokens"));
 }

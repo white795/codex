@@ -54,10 +54,21 @@ keeping the existing configuration format and preserving current upstream behavi
   openings. Missing or malformed main configuration does not opt in, and a disabled saved setting
   remains intact. Tests cover save/reopen, discarded drafts, child-dialog cancellation, and
   composer restoration in both inline and owned-screen sessions.
-- The live footer and composer visuals are not connected yet; saving CxLine at this intermediate
-  checkpoint does not replace the official status line. The installed version is unchanged.
-- Next: connect live footer data, Git probes, and input visuals against the current status-surface
-  and composer APIs, then finish build identity, CI, and release documentation.
+- Live base footer complete: explicitly saved, enabled CxLine renders the effective model and
+  reasoning, Fast label, current directory, context tokens, and official Codex usage windows.
+  Fast visibility uses the current official effective-tier/catalog/account path, including a
+  catalog-default Fast tier whose request id is not `priority`. Seven published runtime tests
+  and three live-data snapshots are reused unchanged.
+- Missing, malformed, or disabled main configuration uses the official footer without modifying
+  its item selection. Terminal-title selections and shared inputs remain on the upstream path;
+  hidden official workspace-headline items do not start fetches or periodic footer refreshes
+  while CxLine is active. Usage data keeps upstream window selection and reset formatting.
+- Saving and closing the editor now applies CxLine to the live footer. App-level token
+  notifications update it through the existing post-notification refresh, without changes to
+  protocol handling. Asynchronous CxLine Git data and composer visuals are not connected yet;
+  the installed version is unchanged.
+- Next: port bounded asynchronous Git lookups and their stale-result safeguards, then restore
+  input visuals, build identity, CI, and release documentation.
 
 ## Verification
 
@@ -67,7 +78,13 @@ keeping the existing configuration format and preserving current upstream behavi
   unrelated tests skipped: the prior 82, 17 restored or added editor-entry/configuration tests,
   and five existing slash-command tests. This behavior-preserving port reuses published
   regression coverage and adds checks for the current App and widget handoff.
-  Run from the repository root with Cargo and just on PATH:
+- The live-base checkpoint ran 138 focused checks, including 19 upstream regression cases for
+  usage windows, Fast/reasoning, status warnings, terminal-title sharing, Daybreak, and token
+  reset behavior. Initially 137 passed; one new fixture omitted the App layer's explicit refresh
+  after a token notification. After correcting only that fixture, a targeted rerun passed both
+  it and an added App-level notification test (2/2). In total, 139 distinct scenarios have passed;
+  the entire selection was not rerun after this test-only correction.
+  The reusable CxLine subset can be run from the repository root with Cargo and just on PATH:
 
   ```bash
   env -u TERM_PROGRAM -u TERM_PROGRAM_VERSION -u NO_COLOR -u TMUX -u TMUX_PANE \
@@ -77,12 +94,14 @@ keeping the existing configuration format and preserving current upstream behavi
     --test-threads 1 --retries 0 --failure-output final --status-level fail
   ```
 
-- All ten imported rendering snapshots passed unchanged: four foundation and six UI snapshots.
+- All thirteen imported rendering snapshots passed unchanged: four foundation, six UI, and
+  three live-footer snapshots.
   Rust formatting and `git diff --check` passed; the imported Rust and migration files also
   passed whitespace and final-newline checks. No snapshot updates were accepted.
 - The runtime-editor test build and execution completed without warnings. `load_saved` now has
-  runtime callers. Strict Clippy, non-test checking, full TUI regression, live-footer behavior,
-  manual terminal acceptance, hosted CI, and release checks remain for later stages.
+  runtime callers. Strict Clippy, non-test checking, full TUI regression, asynchronous Git,
+  composer visuals, manual terminal acceptance, hosted CI, and release checks remain for later
+  stages. The live-base checkpoint did not repeat already-passing cases after its fixture fix.
 - No local release build, active configuration change, installation change, or Git write occurred.
 
 ## Acceptance
@@ -102,7 +121,12 @@ keeping the existing configuration format and preserving current upstream behavi
 - The official tags diverge through release backports; transfer the customization delta,
   not the old branch wholesale.
 - Startup, status surfaces, Daybreak indicators, and daemon behavior changed upstream.
-  Preserve those paths and derive Fast mode from the current official predicate.
+  Preserve those paths. The old `should_show_fast_status` helper no longer exists; derive Fast
+  from the effective service-tier id, its catalog name, and ChatGPT-account visibility, matching
+  the current official model-with-reasoning label rather than checking the raw config value.
+- `ChatWidget::handle_server_notification` updates token state; the App's current-thread routing
+  then refreshes the status line for token notifications. Widget-only tests must simulate that
+  second step, and the App-level regression protects the actual live path.
 - Keep source-build test version and WSL shortcut fixtures deterministic without changing
   production version, platform detection, configuration, or daemon settings.
 - Legacy UI limits remain unchanged: Options editing is unsupported, segment reordering only

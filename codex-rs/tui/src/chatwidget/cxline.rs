@@ -1,4 +1,4 @@
-//! CxLine saved configuration and editor handoff for the current widget.
+//! CxLine saved configuration, editor handoff, and live footer data.
 //!
 //! The configuration UI edits its own draft; only its exit baseline is returned to the widget.
 //! Theme fallback alone must not opt a session into CxLine before a main configuration is saved.
@@ -6,7 +6,19 @@
 use std::path::Path;
 
 use super::ChatWidget;
+use super::status_surfaces::five_hour_status_window;
+use super::status_surfaces::weekly_status_window;
 use crate::statusline::CxLineConfig;
+use crate::statusline::StatusLineContext;
+use crate::statusline::build_statusline;
+use codex_protocol::openai_models::SPEED_TIER_FAST;
+
+#[derive(Default)]
+struct CxLineRateLimits {
+    five_hour_used_percent: Option<f64>,
+    weekly_used_percent: Option<f64>,
+    weekly_resets_at: Option<String>,
+}
 
 pub(super) struct CxLineRuntime {
     config: CxLineConfig,
@@ -37,6 +49,10 @@ impl CxLineRuntime {
         }
     }
 
+    pub(super) fn enabled_config(&self) -> Option<&CxLineConfig> {
+        (self.has_saved_config && self.config.enabled).then_some(&self.config)
+    }
+
     fn editor_config(&self) -> CxLineConfig {
         self.config.clone()
     }
@@ -60,6 +76,68 @@ impl ChatWidget {
         self.cxline_runtime
             .apply_editor_config(config, &self.local_settings.codex_home);
         self.refresh_status_surfaces();
+    }
+
+    pub(super) fn cxline_enabled(&self) -> bool {
+        self.cxline_runtime.enabled_config().is_some()
+    }
+
+    pub(super) fn refresh_cxline_status_line(&mut self) -> bool {
+        let Some(config) = self.cxline_runtime.enabled_config() else {
+            return false;
+        };
+        let cwd = self.status_line_cwd().to_path_buf();
+        let rate_limits = self.cxline_rate_limits();
+        let (used_tokens, window_size) =
+            self.token_info
+                .as_ref()
+                .map_or((None, self.config.model_context_window), |info| {
+                    (
+                        Some(info.last_token_usage.tokens_in_context_window()),
+                        info.model_context_window,
+                    )
+                });
+        // Match the official model-with-reasoning label: catalog tier name, effective tier,
+        // and ChatGPT account visibility, rather than assuming a fixed Fast request id.
+        let fast_mode_active = self.has_chatgpt_account
+            && self.current_service_tier().is_some_and(|service_tier| {
+                self.current_model_service_tier_commands()
+                    .iter()
+                    .any(|tier| {
+                        tier.id == service_tier && tier.name.eq_ignore_ascii_case(SPEED_TIER_FAST)
+                    })
+            });
+        let mut context = StatusLineContext::new(self.current_model(), &cwd)
+            .with_reasoning_effort(self.effective_reasoning_effort())
+            .with_context(used_tokens, window_size)
+            .with_rate_limit(
+                rate_limits.five_hour_used_percent,
+                rate_limits.weekly_used_percent,
+                rate_limits.weekly_resets_at,
+            );
+        if fast_mode_active {
+            context = context.with_fast_mode_active();
+        }
+        let line = build_statusline(config, &context).render_line();
+
+        self.bottom_pane.set_status_line_enabled(/*enabled*/ true);
+        self.set_status_line(Some(line));
+        self.set_status_line_hyperlink(/*url*/ None);
+        true
+    }
+
+    fn cxline_rate_limits(&self) -> CxLineRateLimits {
+        let Some(snapshot) = self.rate_limit_snapshots_by_limit_id.get("codex") else {
+            return CxLineRateLimits::default();
+        };
+        let five_hour = five_hour_status_window(snapshot).map(|(window, _)| window);
+        let weekly = weekly_status_window(snapshot).map(|(window, _)| window);
+
+        CxLineRateLimits {
+            five_hour_used_percent: five_hour.map(|window| window.used_percent),
+            weekly_used_percent: weekly.map(|window| window.used_percent),
+            weekly_resets_at: weekly.and_then(|window| window.resets_at.clone()),
+        }
     }
 }
 
