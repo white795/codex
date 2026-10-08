@@ -46,31 +46,43 @@ keeping the existing configuration format and preserving current upstream behavi
   16/256-color and RGB/HEX selection, preview, panel navigation, child-dialog routing, theme
   switching/reset, save/write/save-as, and exit baselines pass the focused suite on 0.161.0.
   All 21 UI files are reused unchanged from the published 0.159.2 customization.
-- The modules remain test-only until runtime integration; `/cxline` is not available yet.
-- Next: adapt the overlay and `/cxline` dispatch, then live footer data, Git probes, and input
-  visuals against the current App, ChatWidget, and composer APIs.
+- Runtime editor entry complete: `/cxline` is registered and dispatched to the alternate-screen
+  editor. The published overlay and its five lifecycle tests are reused unchanged; shared pager
+  routing restores input policy on exit and keeps transcript backtracking separate.
+- CxLine modules are now included in normal builds. Widget startup loads the saved configuration
+  without creating files; editor exit returns its existing save/theme baseline for subsequent
+  openings. Missing or malformed main configuration does not opt in, and a disabled saved setting
+  remains intact. Tests cover save/reopen, discarded drafts, child-dialog cancellation, and
+  composer restoration in both inline and owned-screen sessions.
+- The live footer and composer visuals are not connected yet; saving CxLine at this intermediate
+  checkpoint does not replace the official status line. The installed version is unchanged.
+- Next: connect live footer data, Git probes, and input visuals against the current status-surface
+  and composer APIs, then finish build identity, CI, and release documentation.
 
 ## Verification
 
 - Locked Linux dependency resolution passed after downloading uncached upstream dependencies.
-- The foundation checkpoint passed 32 tests. With the 50 restored UI tests, the focused suite
-  now passes 82 tests, with 5,633 unrelated tests skipped. This behavior-preserving port reuses
-  the existing regression tests and adds a Fast-display matrix for model/effort data.
+- The foundation checkpoint passed 32 tests; the internal UI checkpoint passed 82 tests after
+  restoring 50 UI tests. The runtime-editor checkpoint passed 104 focused tests, with 5,628
+  unrelated tests skipped: the prior 82, 17 restored or added editor-entry/configuration tests,
+  and five existing slash-command tests. This behavior-preserving port reuses published
+  regression coverage and adds checks for the current App and widget handoff.
   Run from the repository root with Cargo and just on PATH:
 
   ```bash
   env -u TERM_PROGRAM -u TERM_PROGRAM_VERSION -u NO_COLOR -u TMUX -u TMUX_PANE \
     -u STY -u ZELLIJ -u ZELLIJ_SESSION_NAME TERM=xterm-256color COLORTERM=truecolor \
     CARGO_BUILD_JOBS=1 CARGO_NET_OFFLINE=true just test --locked -p codex-tui --lib \
-    -E 'test(statusline)' --test-threads 1 --retries 0 --failure-output final --status-level fail
+    -E 'test(statusline) | test(cxline) | test(slash_command::tests::)' \
+    --test-threads 1 --retries 0 --failure-output final --status-level fail
   ```
 
 - All ten imported rendering snapshots passed unchanged: four foundation and six UI snapshots.
   Rust formatting and `git diff --check` passed; the imported Rust and migration files also
   passed whitespace and final-newline checks. No snapshot updates were accepted.
-- Strict Clippy, full TUI regression, runtime behavior, hosted CI, and release checks remain for
-  later stages. Only the saved-config runtime entry `load_saved` remains unused and produces
-  one warning until runtime wiring is ported; editor helpers are now exercised by the UI tests.
+- The runtime-editor test build and execution completed without warnings. `load_saved` now has
+  runtime callers. Strict Clippy, non-test checking, full TUI regression, live-footer behavior,
+  manual terminal acceptance, hosted CI, and release checks remain for later stages.
 - No local release build, active configuration change, installation change, or Git write occurred.
 
 ## Acceptance

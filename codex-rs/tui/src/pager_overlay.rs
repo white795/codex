@@ -23,6 +23,8 @@ use crate::key_hint::KeyBindingListExt;
 use crate::key_hint::ShortcutHint;
 use crate::keymap::PagerKeymap;
 use crate::render::renderable::Renderable;
+use crate::statusline::CxLineConfig;
+use crate::statusline::CxLineOverlay;
 use crate::terminal_hyperlinks::HyperlinkLine;
 use crate::tui;
 use crate::tui::TuiEvent;
@@ -45,6 +47,7 @@ pub(crate) enum Overlay {
     Transcript(TranscriptOverlay),
     Static(StaticOverlay),
     Analytics(Box<crate::analytics::AnalyticsView>),
+    Cxline(Box<CxLineOverlay>),
 }
 
 impl Overlay {
@@ -75,17 +78,23 @@ impl Overlay {
         Self::Static(StaticOverlay::with_renderables(renderables, title, keymap))
     }
 
+    pub(crate) fn new_cxline(codex_home: &std::path::Path, config: CxLineConfig) -> Self {
+        Self::Cxline(Box::new(CxLineOverlay::new(codex_home, config)))
+    }
+
     pub(crate) fn handle_event(&mut self, tui: &mut tui::Tui, event: TuiEvent) -> Result<()> {
         let input = match self {
             Overlay::Transcript(_) => tui::OverlayInput::Transcript,
             Overlay::Static(_) => tui::OverlayInput::StaticPager,
             Overlay::Analytics(_) => tui::OverlayInput::Usage,
+            Overlay::Cxline(_) => tui::OverlayInput::StaticPager,
         };
         tui.set_overlay_input(input)?;
         let result = match self {
             Overlay::Transcript(o) => o.handle_event(tui, event),
             Overlay::Static(o) => o.handle_event(tui, event),
             Overlay::Analytics(o) => o.handle_event(tui, event),
+            Overlay::Cxline(o) => o.handle_event(tui, event),
         };
         if result.is_err() || self.is_done() {
             let restore = tui.set_overlay_input(tui::OverlayInput::Default);
@@ -99,6 +108,14 @@ impl Overlay {
             Overlay::Transcript(o) => o.is_done(),
             Overlay::Static(o) => o.is_done(),
             Overlay::Analytics(o) => o.is_done,
+            Overlay::Cxline(o) => o.is_done(),
+        }
+    }
+
+    pub(crate) fn cxline_config_for_exit(&self) -> Option<CxLineConfig> {
+        match self {
+            Overlay::Cxline(overlay) => Some(overlay.config_for_exit()),
+            Overlay::Transcript(_) | Overlay::Static(_) | Overlay::Analytics(_) => None,
         }
     }
 }
