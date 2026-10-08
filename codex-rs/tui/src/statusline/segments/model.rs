@@ -30,6 +30,12 @@ impl Segment for ModelSegment {
             display_name
         };
 
+        let display_name = if ctx.fast_mode_active {
+            format!("{display_name} fast")
+        } else {
+            display_name
+        };
+
         Some(SegmentData::new(display_name).with_metadata("model_id", model_name))
     }
 }
@@ -38,14 +44,14 @@ impl Segment for ModelSegment {
 fn reasoning_effort_suffix(effort: &ReasoningEffort) -> &str {
     match effort {
         ReasoningEffort::None => "",
-        ReasoningEffort::Minimal => "·min",
-        ReasoningEffort::Low => "·low",
-        ReasoningEffort::Medium => "·med",
-        ReasoningEffort::High => "·high",
-        ReasoningEffort::XHigh => "·xhigh",
-        ReasoningEffort::Max => "·max",
-        ReasoningEffort::Ultra => "·ultra",
-        ReasoningEffort::Persistent => "·persistent",
+        ReasoningEffort::Minimal => "· min",
+        ReasoningEffort::Low => "· low",
+        ReasoningEffort::Medium => "· med",
+        ReasoningEffort::High => "· high",
+        ReasoningEffort::XHigh => "· xhigh",
+        ReasoningEffort::Max => "· max",
+        ReasoningEffort::Ultra => "· ultra",
+        ReasoningEffort::Persistent => "· persistent",
         ReasoningEffort::Custom(val) => val.as_str(),
     }
 }

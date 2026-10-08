@@ -68,6 +68,9 @@ pub struct StatusLineContext<'a> {
     /// Reasoning effort level
     pub reasoning_effort: Option<ReasoningEffort>,
 
+    /// Whether Fast mode is active for the current model and account.
+    pub fast_mode_active: bool,
+
     /// 当前工作目录
     pub cwd: &'a Path,
 
@@ -95,6 +98,7 @@ impl<'a> StatusLineContext<'a> {
         Self {
             model_name,
             reasoning_effort: None,
+            fast_mode_active: false,
             cwd,
             context_used_tokens: None,
             context_window_size: None,
@@ -107,6 +111,11 @@ impl<'a> StatusLineContext<'a> {
 
     pub fn with_reasoning_effort(mut self, effort: Option<ReasoningEffort>) -> Self {
         self.reasoning_effort = effort;
+        self
+    }
+
+    pub fn with_fast_mode_active(mut self) -> Self {
+        self.fast_mode_active = true;
         self
     }
 

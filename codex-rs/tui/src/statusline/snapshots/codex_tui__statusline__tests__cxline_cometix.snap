@@ -1,11 +1,12 @@
 ---
 source: tui/src/statusline/foundation_tests.rs
+assertion_line: 182
 expression: "(line, buffers)"
 ---
 (
     Line::from_iter([
         Span::from("\u{e26d} ").light_cyan(),
-        Span::from("GPT 5.2 Codex ·med").light_cyan().bold(),
+        Span::from("GPT 5.2 Codex · med").light_cyan().bold(),
         Span::from(" │ ").dim(),
         Span::from("\u{f024b} ").light_yellow(),
         Span::from("codex").light_green().bold(),
@@ -25,35 +26,34 @@ expression: "(line, buffers)"
         Buffer {
             area: Rect { x: 0, y: 0, width: 120, height: 1 },
             content: [
-                " GPT 5.2 Codex ·med │ 󰉋 codex │ 󰊢 main ✓ ↑2 ↓1 │  39% · 50.0k tokens │ 󰪟 25% · 1-28-14                                ",
+                " GPT 5.2 Codex · med │ 󰉋 codex │ 󰊢 main ✓ ↑2 ↓1 │  39% · 50.0k tokens │ 󰪟 25% · 1-28-14                               ",
             ],
             styles: [
                 x: 0, y: 0, fg: LightCyan, bg: Reset, underline: Reset, modifier: NONE,
                 x: 2, y: 0, fg: LightCyan, bg: Reset, underline: Reset, modifier: BOLD,
-                x: 20, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
-                x: 23, y: 0, fg: LightYellow, bg: Reset, underline: Reset, modifier: NONE,
-                x: 25, y: 0, fg: LightGreen, bg: Reset, underline: Reset, modifier: BOLD,
-                x: 30, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
-                x: 33, y: 0, fg: LightBlue, bg: Reset, underline: Reset, modifier: NONE,
-                x: 35, y: 0, fg: LightBlue, bg: Reset, underline: Reset, modifier: BOLD,
-                x: 47, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
-                x: 50, y: 0, fg: LightMagenta, bg: Reset, underline: Reset, modifier: NONE,
-                x: 52, y: 0, fg: LightMagenta, bg: Reset, underline: Reset, modifier: BOLD,
-                x: 70, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
-                x: 73, y: 0, fg: LightCyan, bg: Reset, underline: Reset, modifier: NONE,
-                x: 88, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+                x: 21, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
+                x: 24, y: 0, fg: LightYellow, bg: Reset, underline: Reset, modifier: NONE,
+                x: 26, y: 0, fg: LightGreen, bg: Reset, underline: Reset, modifier: BOLD,
+                x: 31, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
+                x: 34, y: 0, fg: LightBlue, bg: Reset, underline: Reset, modifier: NONE,
+                x: 36, y: 0, fg: LightBlue, bg: Reset, underline: Reset, modifier: BOLD,
+                x: 48, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
+                x: 51, y: 0, fg: LightMagenta, bg: Reset, underline: Reset, modifier: NONE,
+                x: 53, y: 0, fg: LightMagenta, bg: Reset, underline: Reset, modifier: BOLD,
+                x: 71, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
+                x: 74, y: 0, fg: LightCyan, bg: Reset, underline: Reset, modifier: NONE,
+                x: 89, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
             ]
         },
         Buffer {
             area: Rect { x: 0, y: 0, width: 24, height: 1 },
             content: [
-                " GPT 5.2 Codex ·med │ 󰉋",
+                " GPT 5.2 Codex · med │ ",
             ],
             styles: [
                 x: 0, y: 0, fg: LightCyan, bg: Reset, underline: Reset, modifier: NONE,
                 x: 2, y: 0, fg: LightCyan, bg: Reset, underline: Reset, modifier: BOLD,
-                x: 20, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
-                x: 23, y: 0, fg: LightYellow, bg: Reset, underline: Reset, modifier: NONE,
+                x: 21, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: DIM,
             ]
         },
         Buffer {
@@ -70,4 +70,3 @@ expression: "(line, buffers)"
         },
     ],
 )
-

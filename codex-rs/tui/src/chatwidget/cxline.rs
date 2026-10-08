@@ -182,6 +182,8 @@ impl ChatWidget {
                         info.model_context_window,
                     )
                 });
+        let fast_mode_active =
+            self.should_show_fast_status(self.current_model(), self.current_service_tier());
         let mut context = StatusLineContext::new(self.current_model(), &cwd)
             .with_reasoning_effort(self.effective_reasoning_effort())
             .with_context(used_tokens, window_size)
@@ -190,6 +192,9 @@ impl ChatWidget {
                 rate_limits.weekly_used_percent,
                 rate_limits.weekly_resets_at,
             );
+        if fast_mode_active {
+            context = context.with_fast_mode_active();
+        }
         if let Some(preview) = self.cxline_runtime.git_preview(&cwd) {
             context = context.with_git_preview(
                 &preview.branch,

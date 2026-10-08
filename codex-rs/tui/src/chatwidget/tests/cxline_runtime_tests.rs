@@ -151,10 +151,41 @@ async fn saved_cxline_config_renders_live_model_directory_and_context() {
     chat.apply_cxline_editor_config(config);
 
     let line = status_line_text(&chat).expect("CxLine footer");
-    assert!(line.contains("GPT 5.2 Codex ·high"));
+    assert!(line.contains("GPT 5.2 Codex · high"));
     assert!(line.contains("cxline-demo"));
     assert!(line.contains("50% · 64.0k tokens"));
     insta::assert_snapshot!("cxline_live_base_data", line);
+}
+
+#[tokio::test]
+async fn cxline_model_segment_tracks_effective_fast_mode() {
+    let (mut chat, _rx, _op_rx) = make_chatwidget_manual(Some("gpt-5.4")).await;
+    set_chatgpt_auth(&mut chat);
+    set_fast_mode_test_catalog(&mut chat);
+    let mut config = CxLineConfig::default();
+    config.segments.directory.enabled = false;
+    config.segments.git.enabled = false;
+    config.segments.context.enabled = false;
+    config.segments.usage.enabled = false;
+    save_cxline_config(&chat, &config);
+    chat.set_reasoning_effort(Some(ReasoningEffort::XHigh));
+    chat.apply_cxline_editor_config(config);
+
+    chat.set_service_tier(Some(ServiceTier::Fast.request_value().to_string()));
+    assert_eq!(
+        status_line_text(&chat),
+        Some("\u{e26d} GPT 5.4 · xhigh fast".to_string())
+    );
+    insta::assert_snapshot!(
+        "cxline_live_fast_mode",
+        status_line_text(&chat).expect("CxLine footer with Fast mode")
+    );
+
+    chat.set_service_tier(Some(SERVICE_TIER_DEFAULT_REQUEST_VALUE.to_string()));
+    assert_eq!(
+        status_line_text(&chat),
+        Some("\u{e26d} GPT 5.4 · xhigh".to_string())
+    );
 }
 
 #[tokio::test]

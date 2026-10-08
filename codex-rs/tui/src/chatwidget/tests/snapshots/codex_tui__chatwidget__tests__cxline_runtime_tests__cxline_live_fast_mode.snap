@@ -1,0 +1,6 @@
+---
+source: tui/src/chatwidget/tests/cxline_runtime_tests.rs
+assertion_line: 179
+expression: "status_line_text(&chat).expect(\"CxLine footer with Fast mode\")"
+---
+ GPT 5.4 · xhigh fast

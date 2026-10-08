@@ -5,6 +5,7 @@
 
 use super::super::textarea::VimPersistentState;
 use super::*;
+use ratatui::widgets::Block;
 
 impl ComposerDraft {
     pub(in crate::bottom_pane) fn text_with_pending(&self) -> String {

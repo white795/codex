@@ -213,7 +213,7 @@ fn persistent_and_custom_reasoning_efforts_remain_visible() {
     config.segments.context.enabled = false;
     config.segments.usage.enabled = false;
     for (effort, expected) in [
-        (ReasoningEffort::Persistent, "🤖 custom-model ·persistent"),
+        (ReasoningEffort::Persistent, "🤖 custom-model · persistent"),
         (
             ReasoningEffort::Custom("future".to_string()),
             "🤖 custom-model future",
