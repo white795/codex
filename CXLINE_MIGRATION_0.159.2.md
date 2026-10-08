@@ -1,9 +1,9 @@
 # CxLine migration to Codex 0.159.2
 
-- Status: release preparation
+- Status: `0.159.2+cxline.2` release preparation
 - Base: `rust-v0.159.2` (`ff6aec96948b70d94983af2641a6b67c94faeff5`)
 - Target branch: `cxline/0.159.2`
-- Summary: pending
+- Summary: `0.159.2+cxline.1` published; `.2` validation and publication pending
 
 ## Progress
 
@@ -35,7 +35,7 @@
 - Live asynchronous Git integration complete: one bounded porcelain-v2 probe runs through the
   workspace-command boundary, stale cwd/request results are rejected, and official terminal-title
   Git refreshes remain independent.
-- Build identity and fork automation complete: production binaries report
+- Initial build identity and fork automation complete: the published `.1` binary reports
   `0.159.2+cxline.1`; the WSL/Linux quality gate and package-release workflow are restored without
   modifying upstream workflows.
 - [Hosted branch CI](https://github.com/white795/codex/actions/runs/37718380023) passed for
@@ -43,9 +43,17 @@
   Clippy, and 5,647 TUI tests passed with 4 skipped.
 - Release-tag test isolation complete: TUI unit tests use the upstream source-build identity
   `0.0.0`, while production update checks and protocol metadata retain the real Cargo version.
-- Maintenance and historical release documentation restored for the release candidate.
-- Next: build and inspect the complete 0.159.2 release package, run isolated and existing-config
-  WSL checks, then publish `cxline-v0.159.2.1` if those checks pass.
+- `0.159.2+cxline.1` published from `cxline-v0.159.2.1` at
+  `4582156b97a60b92af29de2628dedd8a93f1249b` and was accepted with the existing WSL
+  configuration.
+- The `.2` follow-up implementation landed in `0ade5fb25`: it restores the transparent composer,
+  horizontal borders and `❯` prompt; preserves Astra sparkles on transparent cells; and appends
+  `fast` to the CxLine model segment only when the official effective Fast-state predicate is true.
+- The `.2` build identity is prepared as `0.159.2+cxline.2` without changing the upstream
+  compatibility version used by update checks and protocol metadata.
+- Next: commit and push the `.2` release preparation, require a green branch CI, build and inspect
+  the complete package, run isolated and existing-config WSL checks, then publish
+  `cxline-v0.159.2.2`.
 
 ## Goal
 
@@ -57,8 +65,11 @@ visuals on top of the official Codex 0.159.2 release while preserving upstream b
 - Keep the CxLine configuration format under `$CODEX_HOME/cxline` compatible with the 0.155.1
   custom release.
 - Keep `/cxline`, live preview, theme editing, persistence, and runtime footer switching.
-- Keep the previously selected composer/input visual changes.
-- Keep the WSL/Linux x86_64 CI and release path and the `+cxline.1` build identity.
+- Keep the selected composer/input visuals, including the transparent bordered composer and `❯`
+  prompt.
+- Show the official effective Fast-mode state in CxLine without changing service-tier resolution.
+- Keep the WSL/Linux x86_64 CI and release path and use the `+cxline.2` build identity for this
+  follow-up release.
 - Do not add translation, the Cometix CJK cursor, thread deletion, workflow deletion, or
   multi-platform release builds.
 
@@ -69,9 +80,11 @@ visuals on top of the official Codex 0.159.2 release while preserving upstream b
 3. Reapply the selected composer/input visuals against the current footer and input state machines.
 4. Restore build identity, fork CI/release workflows, and maintenance documentation.
 5. Run focused tests, TUI regression, formatting/lint, build, and WSL manual validation.
+6. Restore the composer visuals lost during the 0.159.2 migration and expose effective Fast mode in
+   the CxLine model segment.
 
-Tasks 1–4 and the automated portion of task 5 are complete. Release packaging and manual WSL
-validation remain open; no 0.159.2 release or installation is claimed by this document.
+Tasks 1–5 completed for the published `.1` release. Task 6 is implemented and locally verified for
+`.2`; hosted CI, release packaging, manual WSL validation and publication remain open.
 
 ## Acceptance
 
@@ -79,6 +92,9 @@ validation remain open; no 0.159.2 release or installation is claimed by this do
 - Saving from `/cxline` switches the footer immediately and survives restart.
 - Existing CxLine themes and custom TOML configuration still load and render correctly.
 - Official 0.159.2 status surfaces and terminal-title behavior remain intact when CxLine is inactive.
+- Fast-capable sessions render `<model> · <reasoning> fast`; other sessions omit `fast`.
+- The composer uses a transparent background, horizontal top and bottom borders, and the `❯`
+  prompt without breaking Astra sparkles.
 - The branch builds and its scoped automated checks pass before release packaging.
 
 ## Risks / dependencies
@@ -88,6 +104,6 @@ validation remain open; no 0.159.2 release or installation is claimed by this do
 - UI changes require reviewed `insta` snapshots.
 - Official release tags carry a real Cargo version while upstream source snapshots are authored
   against `0.0.0`; keep the test-only version boundary in `tui/src/version.rs` when upgrading.
-- Full snapshot runs on WSL render the platform-specific image-paste shortcut as `ctrl+alt+v`,
-  whereas the Ubuntu CI snapshots use `ctrl+v`; do not accept those incidental WSL snapshot files.
-- Final installation remains WSL/Linux x86_64 only.
+- Generic snapshots keep the non-WSL `ctrl+v` shortcut deterministic under tests; explicit WSL
+  shortcut tests cover `ctrl+alt+v`, and production WSL detection is unchanged.
+- The `.2` release and installation remain WSL/Linux x86_64 only.

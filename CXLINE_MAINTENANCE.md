@@ -3,20 +3,22 @@
 This repository keeps the upstream-compatible Codex version in Cargo metadata and adds a
 separate user-visible CxLine revision. It is intentionally maintained for WSL/Linux x86_64 only.
 
-The current release candidate is `0.159.2+cxline.1` on `cxline/0.159.2`. Its code quality gate
-[passed](https://github.com/white795/codex/actions/runs/37718380023) on 2026-10-08 for
-`c671644f35e5c7e7c6c48a5ab1b92b48c4f5865d`; release packaging, manual WSL acceptance and
-publication are still pending. See the active
-[0.159.2 migration record](CXLINE_MIGRATION_0.159.2.md). The latest published version remains
-[0.155.1+cxline.1](CXLINE_RELEASE_0.155.1.md); the
-[first-release handoff](CXLINE_RELEASE_0.154.0.md) retains the original customization decisions
-and limitations.
+The current published release is
+[0.159.2+cxline.1](https://github.com/white795/codex/releases/tag/cxline-v0.159.2.1), tagged at
+`4582156b97a60b92af29de2628dedd8a93f1249b`. The next release candidate is
+`0.159.2+cxline.2` on `cxline/0.159.2`; it restores the transparent bordered composer and adds the
+effective Fast-mode state to the CxLine model segment. See the active
+[0.159.2 migration record](CXLINE_MIGRATION_0.159.2.md). The
+[0.155.1 handoff](CXLINE_RELEASE_0.155.1.md) and
+[first-release handoff](CXLINE_RELEASE_0.154.0.md) retain earlier customization decisions and
+limitations.
 
 ## Version convention
 
 - Upstream compatibility version: `0.159.2`
-- Planned CxLine display version: `0.159.2+cxline.1`
-- Planned release tag: `cxline-v0.159.2.1`
+- Published CxLine display version: `0.159.2+cxline.1`
+- Next CxLine display version: `0.159.2+cxline.2`
+- Next release tag: `cxline-v0.159.2.2`
 
 The release workflow rejects a tag when its upstream portion differs from
 `codex-rs/Cargo.toml`, or when the built binary does not report the matching CxLine revision.
@@ -31,7 +33,7 @@ upstream source snapshots even when the maintenance branch starts from a version
 
 ## Branch and CI strategy
 
-### Release candidate: 0.159.2
+### Follow-up release candidate: 0.159.2+cxline.2
 
 The `cxline/0.159.2` branch reapplies the maintained customization onto `rust-v0.159.2`
 (`ff6aec96948b70d94983af2641a6b67c94faeff5`). It keeps the full CxLine configuration UI,
@@ -40,11 +42,12 @@ composer/input visuals. Missing or disabled CxLine configuration preserves the o
 line. No reasoning translation, CJK cursor patch, thread-deletion patch or new Cometix feature is
 included.
 
-The code candidate CI completed formatting, a locked CLI check, strict TUI Clippy, and the
-deterministic TUI suite: 5,647 passed and 4 skipped. The first restored CI run exposed four
-release-version-dependent upstream snapshots; the lasting fix keeps tests on the source-build
-identity without changing production version behavior. A documentation commit pushed after that
-candidate must receive its own green branch CI before it becomes the tagged release commit.
+The published `.1` candidate completed formatting, a locked CLI check, strict TUI Clippy, and the
+deterministic TUI suite before tagging. The `.2` follow-up keeps the same upstream base and adds two
+user-visible refinements: the composer again uses a transparent background with horizontal borders
+and a `❯` prompt, and CxLine renders an effective Fast state as
+`<model> · <reasoning> fast`. Its release-preparation commit must receive a new green branch CI
+before it becomes the tagged release commit.
 
 ### Workflow policy
 
@@ -66,7 +69,7 @@ build after all other checks pass.
 
 1. Confirm `cxline-ci` is green for the exact commit that will receive the tag.
 2. Build the WSL/Linux release candidate with two Cargo jobs, matching the hosted workflow.
-3. Verify the complete package reports `codex-cxline 0.159.2+cxline.1` and contains `codex`,
+3. Verify the complete package reports `codex-cxline 0.159.2+cxline.2` and contains `codex`,
    `codex-code-mode-host`, `bwrap`, `rg`, the pinned zsh resource, and its package manifest.
 4. With an isolated `CODEX_HOME`, check startup, normal prompting, `/cxline`, save-and-switch,
    restart persistence, Chinese/emoji input, paste, multiline input, and `/daemon` using the
@@ -75,14 +78,15 @@ build after all other checks pass.
 6. Tag the same tested commit and push the tag:
 
    ```bash
-   git tag -a cxline-v0.159.2.1 -m "Release Codex CxLine 0.159.2+cxline.1"
-   git push origin cxline-v0.159.2.1
+   git tag -a cxline-v0.159.2.2 -m "Release Codex CxLine 0.159.2+cxline.2"
+   git push origin cxline-v0.159.2.2
    ```
 
 7. Confirm the tag-triggered build and GitHub Release succeed. Download `SHA256SUMS` with the
    complete archive and verify it before installation.
-8. Add `CXLINE_RELEASE_0.159.2.md` only after publication, recording the released commit, Actions
-   run, artifact verification, installation result and remaining limitations.
+8. Add `CXLINE_RELEASE_0.159.2.md` only after `.2` publication, recording both 0.159.2 revisions,
+   the released commit, Actions run, artifact verification, installation result and remaining
+   limitations.
 
 Git writes, tags and pushes remain manual operations performed by the repository maintainer.
 Never move or recreate a published release tag. A documentation-only archival commit after
@@ -105,9 +109,9 @@ layout or bundled tools.
 
 - Use `just test-tui-unit` for the deterministic TUI suite and the branch workflow as the
   canonical Ubuntu snapshot gate.
-- A full run under WSL detects the actual platform and renders image paste as `ctrl+alt+v`; the
-  stored Ubuntu snapshots render `ctrl+v`. Reject resulting `*.snap.new` files unless the product
-  behavior is intentionally changing.
+- Generic composer snapshots force the non-WSL image-paste shortcut under `cfg(test)`, keeping the
+  stored Ubuntu value `ctrl+v` deterministic. The dedicated shortcut-overlay tests still cover the
+  WSL `ctrl+alt+v` path, while production WSL detection remains unchanged.
 - The upstream `codex-core` currently emits an unused `ToolCallSource` import warning in this
   release tree. The fork's scoped Clippy command uses `--no-deps -D warnings`: CxLine/TUI warnings
   remain errors while the unrelated dependency warning does not fail the job.
@@ -132,9 +136,9 @@ For each selected stable upstream tag:
 7. Build and test the complete package before tagging. Install into a new version directory and
    keep the previous directory for rollback.
 
-The current customization review range is
-`rust-v0.159.2..c671644f35e5c7e7c6c48a5ab1b92b48c4f5865d`. At publication, replace the end with
-the immutable `cxline-v0.159.2.1` tag in the release handoff.
+The published `.1` customization review range is `rust-v0.159.2..cxline-v0.159.2.1`. Review the
+same-base follow-up as `cxline-v0.159.2.1..HEAD`; after `.2` publication, replace `HEAD` with the
+immutable `cxline-v0.159.2.2` tag in the release handoff.
 
 ## Personal installation and rollback
 
@@ -142,7 +146,8 @@ Install complete archives under versioned directories:
 
 ```text
 ~/.local/opt/codex-cxline/0.159.2+cxline.1/
-~/.local/opt/codex-cxline/current -> 0.159.2+cxline.1/
+~/.local/opt/codex-cxline/0.159.2+cxline.2/
+~/.local/opt/codex-cxline/current -> 0.159.2+cxline.2/
 ~/.local/bin/codex-cxline -> ~/.local/opt/codex-cxline/current/bin/codex
 ```
 

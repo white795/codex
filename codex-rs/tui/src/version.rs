@@ -10,7 +10,7 @@ pub const CODEX_CLI_VERSION: &str = "0.0.0";
 /// User-visible identity for this CxLine build of the upstream Codex version.
 ///
 /// Update checks and protocol metadata must continue to use [`CODEX_CLI_VERSION`].
-pub const CODEX_BUILD_VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "+cxline.1");
+pub const CODEX_BUILD_VERSION: &str = concat!(env!("CARGO_PKG_VERSION"), "+cxline.2");
 
 /// Version label used by UI renderers, fixed before layout in unit tests.
 /// Keep release/update decisions on `CODEX_CLI_VERSION`, not this fixture.
