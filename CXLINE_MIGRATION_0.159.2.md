@@ -1,9 +1,9 @@
 # CxLine migration to Codex 0.159.2
 
-Status: active  
-Base: `rust-v0.159.2` (`ff6aec96948b70d94983af2641a6b67c94faeff5`)  
-Target branch: `cxline/0.159.2`  
-Summary: pending
+- Status: release preparation
+- Base: `rust-v0.159.2` (`ff6aec96948b70d94983af2641a6b67c94faeff5`)
+- Target branch: `cxline/0.159.2`
+- Summary: pending
 
 ## Progress
 
@@ -35,7 +35,17 @@ Summary: pending
 - Live asynchronous Git integration complete: one bounded porcelain-v2 probe runs through the
   workspace-command boundary, stale cwd/request results are rejected, and official terminal-title
   Git refreshes remain independent.
-- Next: final runtime regression and 0.159.2 build/release integration.
+- Build identity and fork automation complete: production binaries report
+  `0.159.2+cxline.1`; the WSL/Linux quality gate and package-release workflow are restored without
+  modifying upstream workflows.
+- [Hosted branch CI](https://github.com/white795/codex/actions/runs/37718380023) passed for
+  `c671644f35e5c7e7c6c48a5ab1b92b48c4f5865d`: formatting, locked CLI check, strict scoped TUI
+  Clippy, and 5,647 TUI tests passed with 4 skipped.
+- Release-tag test isolation complete: TUI unit tests use the upstream source-build identity
+  `0.0.0`, while production update checks and protocol metadata retain the real Cargo version.
+- Maintenance and historical release documentation restored for the release candidate.
+- Next: build and inspect the complete 0.159.2 release package, run isolated and existing-config
+  WSL checks, then publish `cxline-v0.159.2.1` if those checks pass.
 
 ## Goal
 
@@ -60,6 +70,9 @@ visuals on top of the official Codex 0.159.2 release while preserving upstream b
 4. Restore build identity, fork CI/release workflows, and maintenance documentation.
 5. Run focused tests, TUI regression, formatting/lint, build, and WSL manual validation.
 
+Tasks 1–4 and the automated portion of task 5 are complete. Release packaging and manual WSL
+validation remain open; no 0.159.2 release or installation is claimed by this document.
+
 ## Acceptance
 
 - A missing saved CxLine configuration leaves the official status line active.
@@ -73,5 +86,8 @@ visuals on top of the official Codex 0.159.2 release while preserving upstream b
 - Official status-line and composer code changed substantially; integration must use current APIs
   instead of copying central 0.155.1 files.
 - UI changes require reviewed `insta` snapshots.
-- `Cargo.lock` and generated version snapshots are deferred until build identity is restored.
+- Official release tags carry a real Cargo version while upstream source snapshots are authored
+  against `0.0.0`; keep the test-only version boundary in `tui/src/version.rs` when upgrading.
+- Full snapshot runs on WSL render the platform-specific image-paste shortcut as `ctrl+alt+v`,
+  whereas the Ubuntu CI snapshots use `ctrl+v`; do not accept those incidental WSL snapshot files.
 - Final installation remains WSL/Linux x86_64 only.
