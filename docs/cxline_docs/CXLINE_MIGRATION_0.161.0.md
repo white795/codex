@@ -96,8 +96,17 @@ keeping the existing configuration format and preserving current upstream behavi
   terminal hints, clears tmux/screen/Zellij hints, and forwards arguments to locked TUI unit tests.
   Ordinary `just test`, upstream recipes, and CI remain unchanged. Five new tests cover build
   identity, the two source-checkout fixtures, CLI version output, and CLI help invocation.
-- Next: restore fork CI and maintenance/release documentation, port the remaining outer-screen
-  snapshot deltas, and complete non-test/strict/full-TUI checks before hosted release acceptance.
+- Fork workflows restored unchanged from `cxline-v0.159.2.2`: branch pushes to `cxline/**` use the
+  Ubuntu 24.04 quality gate, and pushed `cxline-v*` tags use the single GNU x86_64 package/release
+  path. Existing action pins, permission boundaries, concurrency, tag/build/package identity
+  validation, complete package inputs, and checksum artifacts are retained. Upstream workflows
+  and shared setup/package scripts are unchanged.
+- Maintenance records restored under `docs/cxline_docs/`: the index and guide distinguish the
+  active 0.161.0 candidate from the accepted 0.159.2 installation. Four historical migration/release
+  records are restored byte-for-byte from the previous branch. No 0.161.0 release handoff is created
+  before publication. The installed `current` still resolves to `0.159.2+cxline.2`.
+- Next: port remaining outer-screen snapshot deltas and related visual assertions, then complete
+  non-test/strict/full-TUI checks before the push/hosted-CI and tag/release acceptance stages.
 
 ## Verification
 
@@ -171,6 +180,33 @@ keeping the existing configuration format and preserving current upstream behavi
   keep the same package/target selection and narrow the filter to
   `test(=status::tests::status_snapshot_shows_chatgpt_plan_without_email)`; no production code change
   or full-suite rerun is needed for that permission error.
+- The workflow/documentation checkpoint used lightweight checks only; no Rust build or test
+  suite was run. Both workflow files parse as YAML, all ten embedded shell blocks pass `bash -n`,
+  and fourteen structure/policy assertions confirm the existing trigger, target, permissions,
+  concurrency, pinned Actions, quality commands, package inputs, and identity guards.
+- Fifteen isolated checks run the actual tag-validation and staging-identity snippets: nine tag
+  cases and six mocked CLI-output cases cover the planned tag, invalid formats, upstream/revision
+  mismatches, official/missing-suffix identities, and a non-publishing manual branch candidate.
+  These checks use temporary directories and a mock `--version` executable; they do not run
+  Cargo builds, stage real binaries, upload artifacts, or demonstrate hosted release success.
+- Captured arguments from the workflow's package invocation are accepted by the unchanged
+  0.161.0 package parser, including `0.161.0+cxline.1`, the GNU target, archive output, and prebuilt
+  entrypoint/code-mode-host/bwrap paths. Four upstream package-helper modules pass 14 tests.
+  The first direct invocation did not reach tests because it omitted the required
+  `CODEX_REPO_ROOT`; supplying the same root environment already exported by `setup-ci` resolved
+  it without changing source. From the repository root, that helper subset can be run with:
+
+  ```bash
+  env CODEX_REPO_ROOT="$PWD" PYTHONDONTWRITEBYTECODE=1 PYTHONPATH=scripts \
+    python3 -m unittest codex_package.test_cli codex_package.test_cargo \
+      codex_package.test_layout codex_package.test_archive
+  ```
+
+- Byte comparisons confirm the two workflows match the published customization exactly, and
+  all four restored historical records match the prior documentation branch. Relative document
+  links resolve locally; new and modified documents/workflows pass whitespace and newline checks.
+  The guide/index describe hosted CI, publication, checksum, and installation as pending rather
+  than recording unperformed acceptance. No production dependencies or validation tools were added.
 - Rust formatting and source/document whitespace and final-newline checks passed. Difference
   checks exclude `.snap` files from normal trailing-whitespace rules; those fixed-width rendering
   grids are checked separately with `core.whitespace=-blank-at-eol`, preserving meaningful padding.
