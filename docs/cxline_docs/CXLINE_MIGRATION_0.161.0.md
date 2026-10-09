@@ -1,6 +1,6 @@
 # CxLine migration to Codex 0.161.0
 
-- Status: in progress
+- Status: in progress (local checks passed; hosted CI, release, and installation pending)
 - Base: `rust-v0.161.0` (`979011409de0a60b52f179721948e65531d26144`)
 - Branch: `cxline/0.161.0`
 - Source: `cxline-v0.159.2.2` (`be99489eaeaaab6a0e3cef2bbca69a1b67a01e10`)
@@ -105,8 +105,19 @@ keeping the existing configuration format and preserving current upstream behavi
   active 0.161.0 candidate from the accepted 0.159.2 installation. Four historical migration/release
   records are restored byte-for-byte from the previous branch. No 0.161.0 release handoff is created
   before publication. The installed `current` still resolves to `0.159.2+cxline.2`.
-- Next: port remaining outer-screen snapshot deltas and related visual assertions, then complete
-  non-test/strict/full-TUI checks before the push/hosted-CI and tag/release acceptance stages.
+- Outer-screen visual adaptation complete: App, ChatWidget, voice, and inline/owned startup
+  fixtures preserve 0.161.0's spacing, compact shortcuts, MCP login help, and new security-setup
+  and recovered-answer scenarios while restoring the composer borders and normal prompt.
+  History echoes, menu selection markers, and the official Max/Ultra accents are not replaced.
+- Question fixtures now check the retained draft separately and capture the complete three-row
+  empty composer; its new first border row cannot stand in for a cleared-input assertion.
+- Local migration gate complete: full TUI regression, strict scoped Clippy, non-test CLI checking,
+  and workspace formatting pass. This checkpoint changes tests, visual snapshots, and maintenance
+  records only; production code, workflows, active configuration, and installation are unchanged.
+- Next: the maintainer commits and pushes `cxline/0.161.0`, then verifies `cxline-ci` for that exact
+  commit. Only after green hosted CI should the planned `cxline-v0.161.0.1` tag be created and
+  pushed. Hosted packaging/publication, downloaded-package checks, and manual WSL acceptance
+  remain separate gates; no local release build is required.
 
 ## Verification
 
@@ -207,13 +218,43 @@ keeping the existing configuration format and preserving current upstream behavi
   links resolve locally; new and modified documents/workflows pass whitespace and newline checks.
   The guide/index describe hosted CI, publication, checksum, and installation as pending rather
   than recording unperformed acceptance. No production dependencies or validation tools were added.
+- The outer-screen checkpoint reviews 134 snapshot changes and ten test-source files against
+  current upstream content. Existing visual deltas are combined with the current startup and
+  voice layouts; new 0.161.0 scenarios retain their content. Question-queue slicing follows the
+  new border rather than the obsolete `\n\n›` delimiter, keeping the queue-only snapshot scoped
+  to its original intent while explicitly asserting that the main draft survives.
+- One concentrated offline full-TUI run passes all 5,764 tests in 505.369 seconds, with four
+  existing skipped entry points: three isolated subprocess helpers and non-Windows AltGr.
+  `INSTA_UPDATE=no` prevents accepting snapshots; no `.snap.new` or `.pending-snap` remains.
+  The full report is `codex-rs/target/nextest/local/junit.xml`. From the repository root, with
+  Cargo and just on PATH and permission to bind local test servers:
+
+  ```bash
+  cxline_test_home="$(mktemp -d /tmp/cxline-tui-check.XXXXXX)"
+  CODEX_HOME="$cxline_test_home" CARGO_BUILD_JOBS=1 CARGO_NET_OFFLINE=true INSTA_UPDATE=no \
+    just test-tui-unit --test-threads 1 --retries 0 --failure-output final --status-level fail
+  ```
+
+- Strict Clippy initially rejects the RGB constructor in the transparent-starfield test fixture.
+  Reusing the existing `terminal_palette::rgb_color` helper preserves exactly the same RGB
+  comparison without adding an allow rule or changing production colors. Strict scoped Clippy
+  then passes. A direct Cargo rerun of only
+  `bottom_pane::chat_composer::sparkle::tests::cxline_sparkle_blends_transparent_cells_without_replacing_their_background`
+  passes 1/1; the full suite is not repeated and its nextest report is retained.
+- `cargo check --locked -p codex-cli --bin codex` passes without warnings. The scoped lint command
+  is `just clippy --locked -p codex-tui --lib --no-deps -- -D warnings`; neither check builds a
+  release-profile executable or an installable package.
+- The workspace format check must run from `codex-rs`, as in CI. The first outer-directory
+  invocation with only the virtual manifest reports `Failed to find targets`; the CI-equivalent
+  `cargo fmt -- --config imports_granularity=Item --check` then passes without a source change.
+  Stable rustfmt's known nightly-only configuration warnings do not fail the check. TUI formatting
+  also passes after the RGB fixture correction.
 - Rust formatting and source/document whitespace and final-newline checks passed. Difference
   checks exclude `.snap` files from normal trailing-whitespace rules; those fixed-width rendering
   grids are checked separately with `core.whitespace=-blank-at-eol`, preserving meaningful padding.
-- The runtime-editor test build and execution completed without warnings. `load_saved` now has
-  runtime callers. Strict Clippy, non-test checking, full TUI regression, manual terminal acceptance,
-  hosted CI, and release checks remain for later stages. The Git and composer checkpoints completed
-  without compiler warnings and did not repeat their passing test runs.
+- Runtime, Git, and composer builds complete without compiler warnings. `load_saved` has runtime
+  callers; final local Clippy, non-test checking, and full TUI regression are complete. Manual
+  terminal acceptance, hosted CI, publication, package checks, and installation remain pending.
 - No local release build, active configuration change, installation change, or Git write occurred.
 
 ## Acceptance

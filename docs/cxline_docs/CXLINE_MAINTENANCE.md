@@ -47,8 +47,10 @@ The branch starts from the new official release tag and reapplies the released
 `rust-v0.159.2..cxline-v0.159.2.2` customization delta. Foundation, full editor UI, runtime handoff,
 live footer including asynchronous Git, composer visuals, and build identity are connected.
 The WSL/Linux workflows retain the last released fork policy; upstream workflows stay unchanged.
-Remaining outer-screen snapshot adaptation, final Rust checks, hosted CI, release packaging,
-and manual WSL acceptance remain separate gates in the active migration record.
+Outer-screen snapshots and local Rust checks are complete: 5,764 TUI tests pass, four existing
+entry points are skipped, and strict scoped Clippy, non-test CLI checking, and formatting pass.
+The next gate is a maintainer commit/push and green hosted CI for that exact commit. Release
+packaging and manual WSL acceptance remain separate gates in the active migration record.
 
 ### Completed release: 0.159.2+cxline.2
 
@@ -142,6 +144,10 @@ layout or bundled tools.
   tests use the source-build fixture `0.0.0`; the active production compatibility version is `0.161.0`.
 - When changing composer visuals, exercise normal, disabled, Bash, Luna Reserve, Max, and Ultra
   prompt paths. Upstream effort-tier rendering can override the normal prompt glyph.
+- Update test extraction with the visual change: the first row is now a border, not the prompt,
+  and `\n\n›` no longer delimits the composer. Check the draft or full composer frame explicitly;
+  do not replace transcript/history echoes or menu selection markers. RGB comparison fixtures
+  should use the existing `terminal_palette::rgb_color` helper rather than bypassing the lint.
 - Derive Fast display from the same effective predicate as the official status line; do not infer
   it independently from raw configuration or the requested service tier. On 0.161.0, use the
   effective tier id, its catalog's Fast name, and ChatGPT-account visibility, including a

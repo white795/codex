@@ -120,11 +120,7 @@ fn cxline_sparkle_blends_transparent_cells_without_replacing_their_background() 
         let mut filled = Buffer::empty(area);
         filled.set_style(
             area,
-            ratatui::style::Style::default().bg(Color::Rgb(
-                background.0,
-                background.1,
-                background.2,
-            )),
+            ratatui::style::Style::default().bg(crate::terminal_palette::rgb_color(background)),
         );
 
         for buffer in [&mut transparent, &mut filled] {

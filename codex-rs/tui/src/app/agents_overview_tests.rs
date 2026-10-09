@@ -1570,10 +1570,10 @@ async fn root_switch_preserves_vim_line_yank() -> Result<()> {
     );
     let composer_lines = render_bottom_popup(&app.chat_widget, /*width*/ 80)
         .lines()
-        .take(2)
+        .take(4)
         .collect::<Vec<_>>()
         .join("\n");
-    insta::assert_snapshot!(composer_lines, @"› new line\n  saved line");
+    insta::assert_snapshot!(composer_lines, @"────────────────────────────────────────────────────────────────────────────────\n❯ new line\n  saved line\n────────────────────────────────────────────────────────────────────────────────");
     app_server.shutdown().await?;
     Ok(())
 }

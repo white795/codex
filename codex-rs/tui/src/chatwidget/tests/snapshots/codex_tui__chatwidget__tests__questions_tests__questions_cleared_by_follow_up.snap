@@ -1,5 +1,7 @@
 ---
 source: tui/src/chatwidget/tests/questions_tests.rs
-expression: "render_bottom_popup(&chat, 80).lines().next().unwrap()"
+expression: "render_bottom_popup(&chat, 80).lines().take(3).collect::<Vec<_>>().join(\"\\n\")"
 ---
-› Ask Codex to do anything
+────────────────────────────────────────────────────────────────────────────────
+❯ Ask Codex to do anything
+────────────────────────────────────────────────────────────────────────────────
