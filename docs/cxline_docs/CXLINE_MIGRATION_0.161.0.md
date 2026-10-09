@@ -86,8 +86,18 @@ keeping the existing configuration format and preserving current upstream behavi
   explicit WSL shortcut tests remain included, and production WSL detection is unchanged.
 - Foundation, full editor UI, runtime handoff, live footer including Git, and composer visuals are
   connected. The installed version is unchanged.
-- Next: restore build identity, deterministic version fixtures, fork CI, and maintenance/release
-  documentation before final non-test/strict/full-TUI checks and hosted release acceptance.
+- Build identity complete: `--version` reports `codex-cxline 0.161.0+cxline.1`, while help keeps the
+  `codex` invocation. Startup/loading/session headers, `/clear`, `/status`, the update banner, and
+  the optional official Codex-version footer item use the published customization's display path.
+  Update comparisons, server compatibility notices, and protocol metadata keep the upstream
+  version without the CxLine suffix; daemon and updater policies are unchanged.
+- Deterministic test entry restored: source-checkout unit fixtures use `0.0.0` before layout, and
+  UI snapshot sanitizers reference the display version. `just test-tui-unit` normalizes color and
+  terminal hints, clears tmux/screen/Zellij hints, and forwards arguments to locked TUI unit tests.
+  Ordinary `just test`, upstream recipes, and CI remain unchanged. Five new tests cover build
+  identity, the two source-checkout fixtures, CLI version output, and CLI help invocation.
+- Next: restore fork CI and maintenance/release documentation, port the remaining outer-screen
+  snapshot deltas, and complete non-test/strict/full-TUI checks before hosted release acceptance.
 
 ## Verification
 
@@ -136,6 +146,31 @@ keeping the existing configuration format and preserving current upstream behavi
   and four retain new 0.161.0 scenarios with only borders/prompt updated. The overlapping MCP
   popup snapshot keeps the new help text and its style boundary. Header metadata is retained;
   upstream input behavior and unrelated snapshots are not replaced.
+- The build-identity checkpoint first confirmed the minimal version-fixture regression failed
+  because a unit-test checkout still reported `0.161.0` instead of `0.0.0`. After restoring the
+  version split, one concentrated offline run selected 102 checks across the TUI library, CLI
+  library, and CLI binary. Initially 101 passed; the email-less ChatGPT status test could not bind
+  its local wiremock server in the sandbox (`Operation not permitted`). Its existing configuration
+  and credentials are temporary fixtures. An approved rerun of only that case outside the sandbox,
+  using an isolated temporary Codex data directory, passed 1/1. All 102 distinct scenarios have therefore
+  passed; the passing selection was not repeated.
+- The identity selection covers five new regressions plus session/update-banner rendering,
+  status cards, update-picker input and snapshots, and upstream version-comparison behavior.
+  The CLI test build also compiles the normal, non-test TUI library. No snapshots were modified
+  or accepted, and `INSTA_UPDATE=no` left no pending snapshot files. With Cargo and just on PATH,
+  the concentrated selection is reproducible from the repository root:
+
+  ```bash
+  CARGO_BUILD_JOBS=1 CARGO_NET_OFFLINE=true INSTA_UPDATE=no \
+    just test-tui-unit -p codex-cli --bin codex \
+    -E 'test(version::tests::) | test(cli_version_identifies_the_cxline_build) | test(cli_help_keeps_the_codex_command_name) | (test(history_cell::tests::) & (test(session_) | test(update_available))) | test(status::) | test(update_prompt::tests::) | test(update_versions::tests::)' \
+    --test-threads 1 --retries 0 --failure-output final --status-level fail
+  ```
+
+  The email-less ChatGPT case needs local loopback binding permission. For a sandbox-only failure,
+  keep the same package/target selection and narrow the filter to
+  `test(=status::tests::status_snapshot_shows_chatgpt_plan_without_email)`; no production code change
+  or full-suite rerun is needed for that permission error.
 - Rust formatting and source/document whitespace and final-newline checks passed. Difference
   checks exclude `.snap` files from normal trailing-whitespace rules; those fixed-width rendering
   grids are checked separately with `core.whitespace=-blank-at-eol`, preserving meaningful padding.
@@ -176,6 +211,9 @@ keeping the existing configuration format and preserving current upstream behavi
   scheduling, and keep Max/Ultra glyphs on the official effort renderer.
 - Keep source-build test version and WSL shortcut fixtures deterministic without changing
   production version, platform detection, configuration, or daemon settings.
+- Keep the build/display suffix separate from the plain upstream version: the current official
+  server-version notice path treats build metadata as a different client identity. Do not replace
+  compatibility or protocol inputs with `CODEX_BUILD_VERSION` when updating visible labels.
 - Legacy UI limits remain unchanged: Options editing is unsupported, segment reordering only
   changes the preview order, and theme-name input keeps its 32-byte length guard.
 - New upstream dependencies may require cache downloads before locked tests can run.

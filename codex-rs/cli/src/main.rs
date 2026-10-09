@@ -115,8 +115,9 @@ use codex_terminal_detection::TerminalName;
 /// If no subcommand is specified, options will be forwarded to the interactive CLI.
 #[derive(Debug, Parser)]
 #[clap(
+    name = "codex-cxline",
     author,
-    version,
+    version = codex_tui::CODEX_BUILD_VERSION,
     // If a sub‑command is given, ignore requirements of the default args.
     subcommand_negates_reqs = true,
     // The executable is sometimes invoked via a platform‑specific name like
@@ -2709,6 +2710,28 @@ mod tests {
     use codex_protocol::ThreadId;
     use codex_tui::TokenUsage;
     use pretty_assertions::assert_eq;
+
+    #[test]
+    fn cli_version_identifies_the_cxline_build() {
+        let err = MultitoolCli::try_parse_from(["codex", "--version"])
+            .expect_err("version exits before starting the interactive CLI");
+
+        assert_eq!(err.kind(), clap::error::ErrorKind::DisplayVersion);
+        assert_eq!(
+            err.to_string(),
+            concat!("codex-cxline ", env!("CARGO_PKG_VERSION"), "+cxline.1\n")
+        );
+    }
+
+    #[test]
+    fn cli_help_keeps_the_codex_command_name() {
+        let err = MultitoolCli::try_parse_from(["codex", "--help"])
+            .expect_err("help exits before starting the interactive CLI");
+
+        assert_eq!(err.kind(), clap::error::ErrorKind::DisplayHelp);
+        assert!(err.to_string().contains("Usage: codex [OPTIONS] [PROMPT]"));
+        assert!(err.to_string().contains("codex [OPTIONS] <COMMAND> [ARGS]"));
+    }
 
     #[test]
     fn interactive_tui_future_stays_bounded() {

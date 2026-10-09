@@ -249,6 +249,7 @@ mod updates;
 #[cfg(any(not(debug_assertions), test))]
 mod updates_cache;
 mod version;
+pub use version::CODEX_BUILD_VERSION;
 mod vim_search;
 mod width;
 mod windows_sandbox;

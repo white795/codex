@@ -91,6 +91,15 @@ test *args:
 test *args:
     $env:RUST_MIN_STACK = "{{ rust_min_stack }}"; $env:NEXTEST_PROFILE = "local"; cargo nextest run --no-fail-fast @($args | Select-Object -Skip 1)
 
+# Run TUI unit snapshots with deterministic terminal hints and color support.
+# Only the test subprocess environment changes; ordinary tests and CI are untouched.
+[unix]
+test-tui-unit *args:
+    env -u NO_COLOR -u TERM_PROGRAM_VERSION -u TMUX -u TMUX_PANE -u STY \
+        -u ZELLIJ -u ZELLIJ_SESSION_NAME -u ZELLIJ_VERSION \
+        TERM=xterm-256color COLORTERM=truecolor TERM_PROGRAM=codex-test \
+        just test --locked -p codex-tui --lib "$@"
+
 # Run from the repository root so scripts that resolve paths from `cwd` see
 # the same layout they use in GitHub Actions.
 [no-cd]
