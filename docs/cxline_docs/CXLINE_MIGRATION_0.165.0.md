@@ -1,6 +1,6 @@
 # CxLine migration to Codex 0.165.0
 
-- Status: configuration UI complete (82 focused tests passed; runtime and release pending)
+- Status: runtime integration complete (277 focused tests passed; visuals and release pending)
 - Base: `rust-v0.165.0` (`360319d8dee62d87e2d59fc0c21805d79519cfed`)
 - Branch: `cxline/0.165.0`
 - Source: `cxline-v0.161.0.1` (`b8c56678d1f1c9277a58d50c615d165be3d3da9e`)
@@ -80,16 +80,36 @@ local release-profile build without an explicit diagnostic need.
 - Foundation validation passes: 32 tests pass with no failures, and 5,831 unrelated tests are
   filtered out. All four published rendering snapshots pass unchanged; there are no new snapshots.
   Runtime wiring, input visuals, build identity, fork CI, release publication, and manual
-  acceptance remain pending on this branch.
+  acceptance were still pending at that checkpoint.
 - Foundation is committed as `bc72b2dbdb268cf2bcdd27f6ea6934fbab360ec3`.
 - The configuration UI restores 21 published files: editor/dialog implementations, 50 behavioral
   tests, and six layout snapshots. All 21 files match `cxline-v0.161.0.1` exactly, and recursive
-  module formatting passes. The module remains test-only; `/cxline` and runtime integration are
-  the next checkpoint.
+  module formatting passes. The module was still test-only at that checkpoint.
 - Combined foundation/UI validation passes: 82 tests pass with no failures or ignored tests;
   5,831 unrelated tests are filtered out. All ten published snapshots pass unchanged. The cached,
   offline, single-job `dev-small` build takes 4m 33s, and the tests finish in 0.21s. Only the
-  runtime loader `load_saved` remains unused; no lint exemptions are added.
+  runtime loader `load_saved` was still unused at that checkpoint; no lint exemptions were added.
+- Configuration UI is committed as `64872e2e2ddf8a5e4fc1b39ac6cef32022ad5ef3`.
+- Runtime integration restores `/cxline`, alternate-screen editor handoff, explicit saved-config
+  selection, live model/reasoning/Fast, directory/context/usage data, and asynchronous Git caching
+  with cwd/request guards. Terminal-title selections and official footer fallback are preserved.
+  The module now participates in normal builds; input visuals remain upstream until the next stage.
+- Reuse the published runtime contracts rather than introducing new behavior. Adapt the Git
+  request to `WorkspaceCommand::new(argv, cwd)` and assert the current runner's five-second timeout
+  and capped-output flag; the retired optional cwd/output-cap fields are not reintroduced.
+  Of the 15 restored runtime/test/snapshot files, 13 match the published source exactly; only the
+  Git adapter and its request-shape test require API adaptation. All 24 changed Rust files pass
+  formatting checks.
+- Runtime validation passes: 277 tests pass with no failures or ignored tests, covering 128 CxLine
+  tests and 149 related official status-line, terminal-title, slash-command, and pager tests;
+  5,682 unrelated tests are filtered out. The offline, single-job `dev-small` build takes 4m 47s
+  without compiler warnings, and the tests finish in 3.34s. The ten prior CxLine snapshots and
+  four live-footer snapshots pass unchanged. No snapshot regeneration or lint exemptions are needed.
+- Runtime checks cover saved-config opt-in/fallback, child-dialog and page exit, draft restoration
+  in inline and owned sessions, live token notifications, effective catalog/account Fast state,
+  official usage-window selection, Git caching/refresh/failure handling, stale cwd/request results,
+  and terminal-title coexistence. Composer visuals, build identity, fork CI/release adaptation,
+  the full TUI regression, non-test CLI checks, strict Clippy, and manual acceptance remain pending.
 
 The foundation and UI reuse the published behavior contracts without changing production behavior.
 Run their focused compatibility checks from `codex-rs`, using Rust 1.99.1, an isolated `CODEX_HOME`,
@@ -99,6 +119,14 @@ normalized terminal hints, and the verified V8 archive/bindings selected by upst
 ```bash
 CARGO_BUILD_JOBS=1 INSTA_UPDATE=no cargo test --profile dev-small --locked --offline \
   -p codex-tui --lib statusline:: -- --test-threads=1
+```
+
+The runtime checkpoint additionally covers the related upstream paths in the same invocation:
+
+```bash
+CARGO_BUILD_JOBS=1 INSTA_UPDATE=no cargo test --profile dev-small --locked --offline \
+  -p codex-tui --lib -- statusline:: cxline status_line terminal_title \
+  slash_command:: pager_overlay:: --test-threads=1
 ```
 
 Rust 1.99.1 is installed alongside 1.95.0; the default toolchain remains 1.95.0. Foundation module
@@ -111,7 +139,7 @@ Strict Clippy, the full TUI regression, and the non-test CLI check remain later 
 
 ## Next checkpoint
 
-The maintainer reviews and commits the complete configuration UI and its passing regression tests.
-Suggested commit subject: `feat(tui): 迁移 0.165.0 CxLine 完整配置 UI`.
-The next implementation checkpoint connects `/cxline` and its overlay lifecycle to runtime data.
+The maintainer reviews and commits runtime integration and its passing regression tests.
+Suggested commit subject: `feat(tui): 接入 0.165.0 CxLine 配置入口与实时状态栏`.
+The next implementation checkpoint restores transparent composer borders and prompt accents.
 Keep the installed 0.161.0 client and real configuration unchanged during development.

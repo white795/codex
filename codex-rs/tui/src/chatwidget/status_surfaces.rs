@@ -2,6 +2,8 @@
 //!
 //! Keeping this logic in a focused submodule makes the additive title/status
 //! behavior easier to review without paging through the rest of `chatwidget.rs`.
+//! A saved, enabled CxLine configuration selects the custom footer; terminal-title selections
+//! and refreshes remain independent, and other configurations retain the official status line.
 
 use super::*;
 use crate::bottom_pane::status_line_from_segments;
@@ -106,7 +108,11 @@ pub(super) struct CachedProjectRootName {
 
 impl ChatWidget {
     fn status_surface_selections(&self) -> StatusSurfaceSelections {
-        let (status_line_items, invalid_status_line_items) = self.status_line_items_with_invalids();
+        let (status_line_items, invalid_status_line_items) = if self.cxline_enabled() {
+            (Vec::new(), Vec::new())
+        } else {
+            self.status_line_items_with_invalids()
+        };
         let (terminal_title_items, invalid_terminal_title_items) =
             self.terminal_title_items_with_invalids();
         StatusSurfaceSelections {
@@ -306,7 +312,9 @@ impl ChatWidget {
         self.warn_invalid_status_line_items_once(&selections.invalid_status_line_items);
         self.warn_invalid_terminal_title_items_once(&selections.invalid_terminal_title_items);
         self.sync_status_surface_shared_state(&selections);
-        self.refresh_status_line_from_selections(&selections);
+        if !self.refresh_cxline_status_line() {
+            self.refresh_status_line_from_selections(&selections);
+        }
         self.refresh_terminal_title_from_selections(&selections);
     }
 
@@ -447,6 +455,9 @@ impl ChatWidget {
     }
 
     pub(super) fn request_status_line_branch_refresh(&mut self) {
+        if self.cxline_enabled() {
+            self.request_cxline_git_preview_refresh();
+        }
         let selections = self.status_surface_selections();
         if !selections.uses_git_branch() {
             return;
@@ -507,7 +518,7 @@ impl ChatWidget {
             })
     }
 
-    fn status_line_cwd(&self) -> &Path {
+    pub(super) fn status_line_cwd(&self) -> &Path {
         self.current_cwd
             .as_deref()
             .unwrap_or(self.config.cwd.as_path())
@@ -674,7 +685,8 @@ impl ChatWidget {
 
     pub(super) fn refresh_status_line_if_workspace_headline_due(&mut self) {
         let now = Instant::now();
-        if self.status_line_workspace_headline_should_fetch(now)
+        if !self.cxline_enabled()
+            && self.status_line_workspace_headline_should_fetch(now)
             && self
                 .status_line_items_with_invalids()
                 .0
@@ -1127,7 +1139,7 @@ impl ChatWidget {
     }
 }
 
-fn five_hour_status_window(
+pub(super) fn five_hour_status_window(
     snapshot: &RateLimitSnapshotDisplay,
 ) -> Option<(&RateLimitWindowDisplay, bool)> {
     find_primary_codex_window(snapshot, "5h")
@@ -1136,7 +1148,7 @@ fn five_hour_status_window(
         .or_else(|| non_weekly_secondary_window_when_primary_is_weekly(snapshot))
 }
 
-fn weekly_status_window(
+pub(super) fn weekly_status_window(
     snapshot: &RateLimitSnapshotDisplay,
 ) -> Option<(&RateLimitWindowDisplay, bool)> {
     find_codex_window(snapshot, "weekly")

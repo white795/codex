@@ -88,6 +88,7 @@ impl ChatWidget {
             config.http_client_factory(),
             codex_http_client::ClientRouteClass::Other,
         );
+        let cxline_runtime = CxLineRuntime::load(&local_settings.codex_home);
         let configured_pet_load_generation = pets::start_configured_pet_load_if_needed(
             &local_settings,
             /*ambient_pet_missing*/ true,
@@ -118,6 +119,7 @@ impl ChatWidget {
             config,
             local_settings,
             config_panel_tui,
+            cxline_runtime,
             effective_service_tier,
             skills_all: Vec::new(),
             skills_initial_state: None,
