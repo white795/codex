@@ -1,6 +1,6 @@
 # CxLine migration to Codex 0.165.0
 
-- Status: runtime integration complete (277 focused tests passed; visuals and release pending)
+- Status: composer visuals complete (1,341 tests passed, 1 platform ignore; build/release pending)
 - Base: `rust-v0.165.0` (`360319d8dee62d87e2d59fc0c21805d79519cfed`)
 - Branch: `cxline/0.165.0`
 - Source: `cxline-v0.161.0.1` (`b8c56678d1f1c9277a58d50c615d165be3d3da9e`)
@@ -93,7 +93,7 @@ local release-profile build without an explicit diagnostic need.
 - Runtime integration restores `/cxline`, alternate-screen editor handoff, explicit saved-config
   selection, live model/reasoning/Fast, directory/context/usage data, and asynchronous Git caching
   with cwd/request guards. Terminal-title selections and official footer fallback are preserved.
-  The module now participates in normal builds; input visuals remain upstream until the next stage.
+  The module participates in normal builds; input visuals were still upstream at that checkpoint.
 - Reuse the published runtime contracts rather than introducing new behavior. Adapt the Git
   request to `WorkspaceCommand::new(argv, cwd)` and assert the current runner's five-second timeout
   and capped-output flag; the retired optional cwd/output-cap fields are not reintroduced.
@@ -108,8 +108,31 @@ local release-profile build without an explicit diagnostic need.
 - Runtime checks cover saved-config opt-in/fallback, child-dialog and page exit, draft restoration
   in inline and owned sessions, live token notifications, effective catalog/account Fast state,
   official usage-window selection, Git caching/refresh/failure handling, stale cwd/request results,
-  and terminal-title coexistence. Composer visuals, build identity, fork CI/release adaptation,
-  the full TUI regression, non-test CLI checks, strict Clippy, and manual acceptance remain pending.
+  and terminal-title coexistence. Composer visuals and the later build/release gates were still
+  pending at that checkpoint.
+- Runtime integration is committed as `89a8e53496b21d47f3fe8718dcdca74f6f8e7057`.
+- Composer visuals restore the published transparent top/bottom rules and normal `❯` marker while
+  preserving shell `!`, Max `›`, Ultra `»`, Reserve color, layout/cursor geometry, and input state.
+  Astra stars blend against the terminal background while leaving transparent cells unchanged.
+  The seven changed Rust files pass formatting checks; four published visual contracts are restored,
+  with additional Persistent/custom-effort cases in the prompt matrix.
+- Adapt the former in-composer WSL test fixture to upstream's new `footer_state.rs` location.
+  Generic test snapshots use the non-WSL help layout; real WSL detection remains unchanged.
+  Regenerate affected snapshots from 0.165 rather than copying previous release snapshots.
+- Composer verification passes: 1,341 tests pass with no failures, one upstream Windows-only AltGr
+  test is ignored on Linux, and 4,621 unrelated tests are filtered out. The single-job offline
+  `dev-small` build takes 2m 24s; the snapshot-generation run finishes in 22.76s. Review all 143
+  changed snapshots, then repeat the same scope with `INSTA_UPDATE=no`: cached preparation takes
+  1.93s and the tests pass in 22.83s without updating snapshots.
+- Snapshot review confirms unchanged text, recorded rectangles/cursors, and row counts except one
+  previously cropped final blank row now displaying its border. Differences are limited to rules,
+  prompt glyphs, transparent backgrounds, and starfield placement on the remaining blank cells.
+  Fixed-width snapshot rows retain their required trailing spaces; source/document whitespace
+  checks and snapshot checks allowing those row endings pass. No pending snapshots are left.
+- The 14 existing CxLine snapshots and its configuration/runtime implementation remain unchanged.
+  Other application/transcript snapshots are outside this focused scope and will be reviewed in
+  the final full TUI regression. Build identity, CI/release adaptation, strict Clippy, non-test CLI
+  checks, and manual acceptance remain later gates.
 
 The foundation and UI reuse the published behavior contracts without changing production behavior.
 Run their focused compatibility checks from `codex-rs`, using Rust 1.99.1, an isolated `CODEX_HOME`,
@@ -129,6 +152,14 @@ CARGO_BUILD_JOBS=1 INSTA_UPDATE=no cargo test --profile dev-small --locked --off
   slash_command:: pager_overlay:: --test-threads=1
 ```
 
+The composer checkpoint includes all bottom-pane input, paste, Vim, prompt and effect tests:
+
+```bash
+CARGO_BUILD_JOBS=1 INSTA_UPDATE=no cargo test --profile dev-small --locked --offline \
+  -p codex-tui --lib -- bottom_pane:: statusline:: cxline status_line terminal_title \
+  slash_command:: pager_overlay:: --test-threads=1 --quiet
+```
+
 Rust 1.99.1 is installed alongside 1.95.0; the default toolchain remains 1.95.0. Foundation module
 formatting, Cargo workspace metadata, the semantic lockfile audit, and copied-file identity checks
 pass. The 23 copied source/test/snapshot files match the published source exactly; only the module
@@ -139,7 +170,8 @@ Strict Clippy, the full TUI regression, and the non-test CLI check remain later 
 
 ## Next checkpoint
 
-The maintainer reviews and commits runtime integration and its passing regression tests.
-Suggested commit subject: `feat(tui): 接入 0.165.0 CxLine 配置入口与实时状态栏`.
-The next implementation checkpoint restores transparent composer borders and prompt accents.
+The maintainer reviews and commits composer visuals and their reviewed regression snapshots.
+Suggested commit subject: `feat(tui): 迁移 0.165.0 CxLine 输入框样式`.
+The next checkpoint restores fork build identity, deterministic fixtures, CI/release configuration,
+and maintenance handoff before the final release and installation gates.
 Keep the installed 0.161.0 client and real configuration unchanged during development.
