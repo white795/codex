@@ -1,6 +1,6 @@
 # CxLine migration to Codex 0.165.0
 
-- Status: foundation complete (focused local checks passed; editor/runtime and release pending)
+- Status: configuration UI complete (82 focused tests passed; runtime and release pending)
 - Base: `rust-v0.165.0` (`360319d8dee62d87e2d59fc0c21805d79519cfed`)
 - Branch: `cxline/0.165.0`
 - Source: `cxline-v0.161.0.1` (`b8c56678d1f1c9277a58d50c615d165be3d3da9e`)
@@ -79,16 +79,25 @@ local release-profile build without an explicit diagnostic need.
   under `cfg(test)` until runtime integration; normal CLI behavior is unchanged at this checkpoint.
 - Foundation validation passes: 32 tests pass with no failures, and 5,831 unrelated tests are
   filtered out. All four published rendering snapshots pass unchanged; there are no new snapshots.
-  Full editor UI, runtime wiring, input visuals, build identity, fork CI, release publication, and
-  manual acceptance remain pending on this branch.
+  Runtime wiring, input visuals, build identity, fork CI, release publication, and manual
+  acceptance remain pending on this branch.
+- Foundation is committed as `bc72b2dbdb268cf2bcdd27f6ea6934fbab360ec3`.
+- The configuration UI restores 21 published files: editor/dialog implementations, 50 behavioral
+  tests, and six layout snapshots. All 21 files match `cxline-v0.161.0.1` exactly, and recursive
+  module formatting passes. The module remains test-only; `/cxline` and runtime integration are
+  the next checkpoint.
+- Combined foundation/UI validation passes: 82 tests pass with no failures or ignored tests;
+  5,831 unrelated tests are filtered out. All ten published snapshots pass unchanged. The cached,
+  offline, single-job `dev-small` build takes 4m 33s, and the tests finish in 0.21s. Only the
+  runtime loader `load_saved` remains unused; no lint exemptions are added.
 
-The foundation reuses the published behavior contracts without changing production behavior.
-Run its focused compatibility checks from `codex-rs`, using Rust 1.99.1, an isolated `CODEX_HOME`,
+The foundation and UI reuse the published behavior contracts without changing production behavior.
+Run their focused compatibility checks from `codex-rs`, using Rust 1.99.1, an isolated `CODEX_HOME`,
 normalized terminal hints, and the verified V8 archive/bindings selected by upstream's
-`setup-rusty-v8` action:
+`setup-rusty-v8` action. With the dependencies cached, use:
 
 ```bash
-CARGO_BUILD_JOBS=1 INSTA_UPDATE=no cargo test --profile dev-small --locked \
+CARGO_BUILD_JOBS=1 INSTA_UPDATE=no cargo test --profile dev-small --locked --offline \
   -p codex-tui --lib statusline:: -- --test-threads=1
 ```
 
@@ -96,12 +105,13 @@ Rust 1.99.1 is installed alongside 1.95.0; the default toolchain remains 1.95.0.
 formatting, Cargo workspace metadata, the semantic lockfile audit, and copied-file identity checks
 pass. The 23 copied source/test/snapshot files match the published source exactly; only the module
 entry is narrowed to this checkpoint. The single-job cold build took 26m 21s; the focused tests
-finished in 0.09s. Cargo reports two expected dead-code warning groups for the not-yet-connected
-`load_saved`, `get_segment_config_mut`, and `THEME_NAMES` UI/runtime interfaces. No lint exemptions
-are added; strict Clippy, the full TUI regression, and the non-test CLI check remain later gates.
+finished in 0.09s. That foundation build reported two expected dead-code warning groups for
+`load_saved`, `get_segment_config_mut`, and `THEME_NAMES`; the UI now uses the latter two interfaces.
+Strict Clippy, the full TUI regression, and the non-test CLI check remain later gates.
 
 ## Next checkpoint
 
-The maintainer reviews and commits this foundation before the complete configuration UI is
-restored. Suggested commit subject: `feat(tui): 迁移 0.165.0 CxLine 基础配置与渲染`.
+The maintainer reviews and commits the complete configuration UI and its passing regression tests.
+Suggested commit subject: `feat(tui): 迁移 0.165.0 CxLine 完整配置 UI`.
+The next implementation checkpoint connects `/cxline` and its overlay lifecycle to runtime data.
 Keep the installed 0.161.0 client and real configuration unchanged during development.

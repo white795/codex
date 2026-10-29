@@ -1,0 +1,107 @@
+---
+source: tui/src/statusline/icon_selector_tests.rs
+expression: buffers
+---
+[
+    Buffer {
+        area: Rect { x: 0, y: 0, width: 80, height: 32 },
+        content: [
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                  ┌Icon Selector─────────────────────────────┐                  ",
+            "                  │┌Style───────────────────────────────────┐│                  ",
+            "                  ││[•] Emoji  [ ] Nerd Font                ││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  │┌Emoji Icons─────────────────────────────┐│                  ",
+            "                  ││🤖 Robot (Model)                        ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││💻 Laptop                               ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││📁 Folder                               ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││📂 Open Folder                          ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││📊 Bar Chart                            ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││🌿 Branch (Git)                         ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││🌱 Seedling                             ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  ││🔧 Wrench                               ││                  ", // hidden by multi-width symbols: [(21, " ")]
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  │┌Custom──────────────────────────────────┐│                  ",
+            "                  ││> 中文🌙 <                              ││                  ", // hidden by multi-width symbols: [(23, " "), (25, " "), (27, " ")]
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  │┌────────────────────────────────────────┐│                  ",
+            "                  ││[Enter] Confirm  [Esc] Cancel           ││                  ",
+            "                  │└────────────────────────────────────────┘│                  ",
+            "                  └──────────────────────────────────────────┘                  ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+            "                                                                                ",
+        ],
+        styles: [
+            x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 20, y: 10, fg: Reset, bg: Reset, underline: Reset, modifier: REVERSED,
+            x: 21, y: 10, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 22, y: 10, fg: Reset, bg: Reset, underline: Reset, modifier: REVERSED,
+            x: 36, y: 10, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 19, y: 19, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 61, y: 19, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 19, y: 20, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 61, y: 20, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 19, y: 21, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 61, y: 21, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        ]
+    },
+    Buffer {
+        area: Rect { x: 0, y: 0, width: 32, height: 32 },
+        content: [
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "       ┌Icon Selector───┐       ",
+            "       │┌Style─────────┐│       ",
+            "       ││[•] Emoji  [ ]││       ",
+            "       │└──────────────┘│       ",
+            "       │┌Emoji Icons───┐│       ",
+            "       ││🤖 Robot (Mode││       ", // hidden by multi-width symbols: [(10, " ")]
+            "       ││💻 Laptop     ││       ", // hidden by multi-width symbols: [(10, " ")]
+            "       ││📁 Folder     ││       ", // hidden by multi-width symbols: [(10, " ")]
+            "       ││📂 Open Folder││       ", // hidden by multi-width symbols: [(10, " ")]
+            "       ││📊 Bar Chart  ││       ", // hidden by multi-width symbols: [(10, " ")]
+            "       ││🌿 Branch (Git││       ", // hidden by multi-width symbols: [(10, " ")]
+            "       ││🌱 Seedling   ││       ", // hidden by multi-width symbols: [(10, " ")]
+            "       ││🔧 Wrench     ││       ", // hidden by multi-width symbols: [(10, " ")]
+            "       │└──────────────┘│       ",
+            "       │┌Custom────────┐│       ",
+            "       ││> 中文🌙 <    ││       ", // hidden by multi-width symbols: [(12, " "), (14, " "), (16, " ")]
+            "       │└──────────────┘│       ",
+            "       │┌──────────────┐│       ",
+            "       ││[Enter] Confir││       ",
+            "       │└──────────────┘│       ",
+            "       └────────────────┘       ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+            "                                ",
+        ],
+        styles: [
+            x: 0, y: 0, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 9, y: 10, fg: Reset, bg: Reset, underline: Reset, modifier: REVERSED,
+            x: 10, y: 10, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 11, y: 10, fg: Reset, bg: Reset, underline: Reset, modifier: REVERSED,
+            x: 23, y: 10, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 8, y: 19, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 24, y: 19, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 8, y: 20, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 24, y: 20, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+            x: 8, y: 21, fg: Yellow, bg: Reset, underline: Reset, modifier: NONE,
+            x: 24, y: 21, fg: Reset, bg: Reset, underline: Reset, modifier: NONE,
+        ]
+    },
+]
+
