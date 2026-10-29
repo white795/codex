@@ -1,6 +1,6 @@
 # CxLine migration to Codex 0.165.0
 
-- Status: composer visuals complete (1,341 tests passed, 1 platform ignore; build/release pending)
+- Status: build identity and WSL workflow checkpoint complete; final regression/release pending
 - Base: `rust-v0.165.0` (`360319d8dee62d87e2d59fc0c21805d79519cfed`)
 - Branch: `cxline/0.165.0`
 - Source: `cxline-v0.161.0.1` (`b8c56678d1f1c9277a58d50c615d165be3d3da9e`)
@@ -133,6 +133,47 @@ local release-profile build without an explicit diagnostic need.
   Other application/transcript snapshots are outside this focused scope and will be reviewed in
   the final full TUI regression. Build identity, CI/release adaptation, strict Clippy, non-test CLI
   checks, and manual acceptance remain later gates.
+- Composer visuals are committed as `1d2cbba6ba7873df64df765f3830f347d4d70cd9`.
+- Build identity restores the published CLI/help contracts and separates upstream compatibility
+  version `0.165.0` from display identity `0.165.0+cxline.1`. Headers, status, update banners, and
+  the optional official version item use the display path; machine compatibility inputs retain
+  the upstream version. TUI unit fixtures use `0.0.0` before layout, and snapshot sanitizers follow
+  the display fixture, including the new Daybreak replay case.
+- Restore `just test-tui-unit` and both fork workflows with upstream's pinned Rust 1.99.1 action.
+  Retain WSL/Linux GNU x86_64, tag/binary revision checks, finalized bwrap digest ordering, complete
+  package staging, and tag-only publication. The current upstream builder validates required
+  resources without a patched zsh. Other upstream workflows, daemon policy, and updater policy
+  remain unchanged.
+- Restore the five historical migration/release records byte-for-byte from `cxline-v0.161.0.1`.
+  Update the maintenance guide and index for this branch and its separate remaining gates.
+  Restored workflow definitions do not imply hosted CI, publication, package-download verification,
+  or installation has run.
+- Build-identity checkpoint verification passes 78 TUI unit tests covering version fixtures,
+  update comparison/prompt behavior, and status cards; 5,888 unrelated tests are skipped.
+  The restored `just test-tui-unit` forwards arguments and normalizes the terminal correctly.
+  The offline single-job `dev-small` build takes 2m 40s, and nextest finishes in 3.414s with
+  `INSTA_UPDATE=no`. No snapshots change and no pending snapshot files remain.
+- Nextest resolves full workspace metadata before filtering tests. Its first offline attempt
+  requires two additional locked cache entries (`deno_core_icudata` 0.78.0 and `v8` 152.2.0).
+  Populate those caches separately, then rerun offline; Cargo manifests and the lockfile stay
+  unchanged. The three version contracts pass. The two CLI parser contracts also pass: output is
+  `codex-cxline 0.165.0+cxline.1`, and help keeps the `codex` invocation. The single-job offline
+  `dev-small` CLI test build takes 17m 00s, including dependencies not used by the focused TUI build;
+  the two tests finish in 0.01s, with 313 unrelated tests filtered out. Normal-mode TUI code is
+  compiled as a dependency of those tests; the separate non-test CLI check remains a final gate.
+- Package validation passes all 27 existing upstream Python tests without adding dependencies.
+  Parse both fork workflow YAML files and syntax-check ten shell steps. Execute seven tag cases
+  and the actual artifact-staging shell against fixture executables and the current package builder,
+  with Cargo/network tripwires: complete archive layout, display identity, bwrap byte preservation,
+  checksums, and revision-mismatch rejection pass. This exercises staging without a Rust release
+  build and is not acceptance of a real release package.
+- Both fork workflows differ from the published source only in the pinned Rust toolchain action,
+  matching upstream 0.165.0. Formatting for all 19 changed Rust files and the justfile passes.
+  All 30 changed/new files pass source/document whitespace and final-newline checks; local document
+  links resolve, and all five historical records match the source tag exactly. The focused TUI,
+  CLI, and package suites pass 107 tests in total. Both Rust builds finish without warnings.
+  No local release-profile build, real configuration change, installation change, or Git write
+  occurs at this checkpoint. Final full TUI regression and strict Clippy remain pending.
 
 The foundation and UI reuse the published behavior contracts without changing production behavior.
 Run their focused compatibility checks from `codex-rs`, using Rust 1.99.1, an isolated `CODEX_HOME`,
@@ -168,10 +209,25 @@ finished in 0.09s. That foundation build reported two expected dead-code warning
 `load_saved`, `get_segment_config_mut`, and `THEME_NAMES`; the UI now uses the latter two interfaces.
 Strict Clippy, the full TUI regression, and the non-test CLI check remain later gates.
 
+The build-identity checkpoint uses the same isolated environment, from `codex-rs`:
+
+```bash
+CARGO_BUILD_JOBS=1 INSTA_UPDATE=no just test-tui-unit --cargo-profile dev-small --offline \
+  --test-threads 1 --retries 0 --failure-output final --status-level fail \
+  -E 'test(/^version::tests::/) | test(/^update_versions::tests::/) | test(/^update_prompt::tests::/) | test(/^status::/)'
+
+CARGO_BUILD_JOBS=1 cargo test --profile dev-small --locked --offline -p codex-cli --bin codex -- \
+  tests::cli_version_identifies_the_cxline_build tests::cli_help_keeps_the_codex_command_name \
+  --test-threads=1 --quiet
+
+CODEX_REPO_ROOT="$(pwd)/.." python3 -m unittest discover -s ../scripts/codex_package -p 'test_*.py'
+```
+
 ## Next checkpoint
 
-The maintainer reviews and commits composer visuals and their reviewed regression snapshots.
-Suggested commit subject: `feat(tui): 迁移 0.165.0 CxLine 输入框样式`.
-The next checkpoint restores fork build identity, deterministic fixtures, CI/release configuration,
-and maintenance handoff before the final release and installation gates.
+The build-identity, deterministic-recipe, package-layout, and workflow checkpoint is ready for
+maintainer review/commit. Suggested commit subject:
+`chore(cxline): 恢复 0.165.0 版本标识与 WSL 发布流程`.
+The following checkpoint reviews outer-screen snapshots and completes the final full TUI
+regression, strict scoped Clippy, and non-test CLI gate before maintainer push and hosted CI.
 Keep the installed 0.161.0 client and real configuration unchanged during development.

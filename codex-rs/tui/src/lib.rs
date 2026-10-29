@@ -263,6 +263,7 @@ mod updates;
 mod updates_cache;
 mod user_prompt;
 mod version;
+pub use version::CODEX_BUILD_VERSION;
 mod vim_search;
 mod width;
 mod windows_sandbox;
