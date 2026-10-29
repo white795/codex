@@ -1,6 +1,6 @@
 # CxLine migration to Codex 0.165.0
 
-- Status: build identity and WSL workflow checkpoint complete; final regression/release pending
+- Status: local validation complete (full run plus focused snapshot rechecks); commit/push/hosted CI pending
 - Base: `rust-v0.165.0` (`360319d8dee62d87e2d59fc0c21805d79519cfed`)
 - Branch: `cxline/0.165.0`
 - Source: `cxline-v0.161.0.1` (`b8c56678d1f1c9277a58d50c615d165be3d3da9e`)
@@ -174,6 +174,49 @@ local release-profile build without an explicit diagnostic need.
   CLI, and package suites pass 107 tests in total. Both Rust builds finish without warnings.
   No local release-profile build, real configuration change, installation change, or Git write
   occurs at this checkpoint. Final full TUI regression and strict Clippy remain pending.
+- Build identity and WSL workflow restoration are committed as
+  `d61da29d1f06ab7c784d28d65293408e3ea0c644`; the final local gate starts from a clean worktree.
+- Reproduce the old voice-prompt and Reserve-palette assertions with the existing test binary:
+  both fail for the intended visual differences (`›` lookup versus `❯`, gray versus `Reset`).
+  Adapt nine test-source files using the published visual contracts, preserving 0.165.0's
+  `f9 mute` hint and current model/session/permission expectations. Cover full composer borders,
+  draft and Vim restoration, question-queue slicing, voice prompts, and transparent Reserve
+  backgrounds without changing production code. Keep history/menu markers and Max/Ultra intact.
+- Run the outer App/ChatWidget/startup snapshot scope with updates enabled, then review its
+  differences before a full TUI run with `INSTA_UPDATE=no`. This generation pass runs 2,299 tests
+  in 455.945s: 2,298 pass and one new 0.165.0 inline snapshot needs the visible border update.
+  Preserve that subagent prompt's text and menu choices while updating the expected surrounding
+  composer; the ordinary menu `›` remains unchanged.
+- Review all 156 changed snapshots. Their text remains equivalent after the accepted rule,
+  normal-prompt, and three Astra starfield changes; quoted grids keep their dimensions and
+  recorded cursor text is unchanged. Metadata follows current upstream test paths/normalizers
+  and the restored display fixture. Restore the full four-row multiline Vim sample rather than
+  accepting a crop that hides `saved line`. Ten test-source files now carry visual expectations;
+  production code and the 14 CxLine snapshots remain unchanged. No pending snapshots remain.
+- Strict scoped Clippy passes with `--no-deps -D warnings`, using offline single-job `dev-small`
+  in 12m 36s without warnings. Full workspace Rust formatting passes; stable rustfmt's
+  nightly-only import-option notices are expected. Non-test CLI checking also passes without
+  warnings in 7m 38s.
+- The full TUI run uses `INSTA_UPDATE=no` and a new isolated `CODEX_HOME`. Cached compilation
+  takes 1m 25s; all 5,962 selected tests run in 803.310s. Of these, 5,960 pass and two report old
+  composer snapshots outside the outer-screen generation scope: shortcut clipboard paste and
+  mapped Shift+Enter rendering. Both differences contain only the expected rules/prompt and
+  current snapshot metadata; pasted text, line breaks, and fixed-grid geometry are preserved.
+- Review and regenerate those two snapshots, then rerun exactly the two failed tests with
+  `INSTA_UPDATE=no`: both pass in 0.741s after 0.80s cached preparation. All 5,962 selected cases
+  are verified across the full run and this focused recheck; the original full run was not green
+  and is not presented as a second clean full run. Preserve its report separately because the
+  focused recheck replaces nextest's default JUnit output. Hosted CI must still run the complete
+  suite for the exact final commit.
+- Four pre-existing entries are skipped by the normal Linux suite: `startup_typeahead_pty_child`,
+  `caught_panic_pty_child`, and `owned_screen_lifecycle_child` are isolated helpers invoked by
+  their parent tests; `altgr_ctrl_alt_char_inserts_literal` applies only on Windows. Add no new
+  ignore or lint-allow rules.
+- The final checkpoint changes ten test-source files, 158 reviewed snapshots, and maintenance
+  documentation. Source and the earlier 156 snapshots remain byte-identical through the full run
+  and focused rechecks; only the two additionally reviewed snapshots change after that run.
+  Production implementation, Cargo files, workflow policy, real configuration, installation, and
+  this repository's Git history/index/refs are untouched. No local release build runs.
 
 The foundation and UI reuse the published behavior contracts without changing production behavior.
 Run their focused compatibility checks from `codex-rs`, using Rust 1.99.1, an isolated `CODEX_HOME`,
@@ -207,7 +250,8 @@ pass. The 23 copied source/test/snapshot files match the published source exactl
 entry is narrowed to this checkpoint. The single-job cold build took 26m 21s; the focused tests
 finished in 0.09s. That foundation build reported two expected dead-code warning groups for
 `load_saved`, `get_segment_config_mut`, and `THEME_NAMES`; the UI now uses the latter two interfaces.
-Strict Clippy, the full TUI regression, and the non-test CLI check remain later gates.
+At that foundation checkpoint, strict Clippy, the full TUI regression, and the non-test CLI
+check were still pending.
 
 The build-identity checkpoint uses the same isolated environment, from `codex-rs`:
 
@@ -223,11 +267,35 @@ CARGO_BUILD_JOBS=1 cargo test --profile dev-small --locked --offline -p codex-cl
 CODEX_REPO_ROOT="$(pwd)/.." python3 -m unittest discover -s ../scripts/codex_package -p 'test_*.py'
 ```
 
+The final local gate uses the same Rust/V8 setup and cached locked dependencies, from `codex-rs`:
+
+```bash
+CARGO_BUILD_JOBS=1 just clippy --profile dev-small --locked --offline \
+  -p codex-tui --lib --no-deps -- -D warnings
+CARGO_BUILD_JOBS=1 cargo check --profile dev-small --locked --offline -p codex-cli --bin codex
+
+cxline_test_home="$(mktemp -d /tmp/cxline-tui-check.XXXXXX)"
+CODEX_HOME="$cxline_test_home" CARGO_BUILD_JOBS=1 INSTA_UPDATE=no \
+  just test-tui-unit --cargo-profile dev-small --offline --test-threads 1 --retries 0 \
+  --failure-output final --status-level fail
+
+cargo fmt -- --config imports_granularity=Item --check
+```
+
+The snapshot-only follow-up reruns the two failed cases with updates disabled:
+
+```bash
+CODEX_HOME="$cxline_test_home" CARGO_BUILD_JOBS=1 INSTA_UPDATE=no \
+  just test-tui-unit --cargo-profile dev-small --offline \
+  --test-threads 1 --retries 0 --failure-output final --status-level fail \
+  -E 'test(/^clipboard_copy::worker::tests::right_click_paste_uses_normal_input_and_discards_stale_reads$/) | test(/^tui::windows_key_sequence::tests::mapped_shift_enter_renders_newlines_in_the_composer$/)'
+```
+
 ## Next checkpoint
 
-The build-identity, deterministic-recipe, package-layout, and workflow checkpoint is ready for
-maintainer review/commit. Suggested commit subject:
-`chore(cxline): 恢复 0.165.0 版本标识与 WSL 发布流程`.
-The following checkpoint reviews outer-screen snapshots and completes the final full TUI
-regression, strict scoped Clippy, and non-test CLI gate before maintainer push and hosted CI.
+The final local checkpoint is ready for maintainer review and commit. Suggested subject:
+`test(tui): 完成 0.165.0 CxLine 视觉适配与本地验收`.
+Push `cxline/0.165.0` and verify `cxline-ci` for that exact commit. Only a green hosted candidate
+proceeds to the planned `cxline-v0.165.0.1` tag. Publication, downloaded-package checksum/layout
+verification, isolated and existing-config WSL acceptance, and installation remain separate gates.
 Keep the installed 0.161.0 client and real configuration unchanged during development.

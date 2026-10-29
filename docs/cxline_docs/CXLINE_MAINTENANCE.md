@@ -17,8 +17,9 @@ limitations.
 
 The active migration is `cxline/0.165.0`, based on `rust-v0.165.0`
 (`360319d8dee62d87e2d59fc0c21805d79519cfed`) and targeting `0.165.0+cxline.1`.
-Final local regression, hosted CI, publication, downloaded-package verification, and local adoption
-are still pending. Read the [active migration record](CXLINE_MIGRATION_0.165.0.md) for the next
+Local validation is complete through a full run and focused snapshot rechecks. Hosted CI,
+publication, downloaded-package verification, and local adoption are still pending.
+Read the [active migration record](CXLINE_MIGRATION_0.165.0.md) for the next
 checkpoint; do not treat restored workflows as evidence that hosted CI or release acceptance
 has completed.
 
@@ -54,9 +55,14 @@ The WSL/Linux workflows retain the last released fork policy and use upstream's 
 a resource. Upstream workflows stay unchanged. Focused runtime and composer verification passes.
 Build-identity checks pass 78 TUI tests and two CLI version/help tests; all 27 existing package
 tests also pass, alongside workflow syntax, tag rejection, and fixture-based staging checks.
-Final outer-screen snapshot review, full TUI regression, strict scoped Clippy, and non-test CLI
-checking remain separate local gates. Hosted branch CI must pass for the exact commit before
-tag publication. Release packaging and manual WSL acceptance remain later gates in the active record.
+Final local validation reviews 158 outer/input snapshots and ten test-source files. A full TUI
+run passes 5,960 cases and identifies two old composer snapshots; after their review/update,
+the same two tests pass with snapshot updates disabled. All 5,962 selected cases are verified
+across those runs, with four existing helper/platform skips. The initial full report remains a
+failed report; a second complete local run is not claimed. Strict scoped Clippy, non-test CLI
+checking, and formatting pass. Hosted branch CI must still run the full suite for the exact
+committed candidate before tag publication. Release packaging and manual WSL acceptance remain
+later gates in the active record.
 
 ### Completed release: 0.159.2+cxline.2
 
@@ -158,6 +164,10 @@ layout or bundled tools.
   and `\n\n›` no longer delimits the composer. Check the draft or full composer frame explicitly;
   do not replace transcript/history echoes or menu selection markers. RGB comparison fixtures
   should use the existing `terminal_palette::rgb_color` helper rather than bypassing the lint.
+- Multiline Vim samples must retain every restored input line plus both borders. Include clipboard
+  and terminal key-sequence snapshots when reviewing composer changes; App/ChatWidget/startup
+  filters do not cover them. After snapshot-only corrections, rerun affected cases with updates
+  disabled and report the initial full run and focused recheck separately.
 - Derive Fast display from the same effective predicate as the official status line; do not infer
   it independently from raw configuration or the requested service tier. On 0.165.0, use the
   effective tier id, its catalog's Fast name, and ChatGPT-account visibility, including a
