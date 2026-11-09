@@ -3,8 +3,8 @@
 Fork-specific migration and release records live here; general upstream documentation stays in
 the parent `docs/` directory.
 
-- [Active 0.165.0 migration](CXLINE_MIGRATION_0.165.0.md): scope, commit checkpoints, verification,
-  and remaining release/installation gates.
+- [0.165.0 migration and Shell UI follow-up](CXLINE_MIGRATION_0.165.0.md): published/installed `.1`,
+  the `.2` Shell UI changes, verification, and remaining release/installation gates.
 - [Maintenance guide](CXLINE_MAINTENANCE.md): version/branch conventions, WSL workflows, release
   gates, installation, rollback, and reusable migration practices.
 - [0.161.0 migration archive](CXLINE_MIGRATION_0.161.0.md): development verification at the accepted
@@ -16,4 +16,5 @@ the parent `docs/` directory.
 
 Historical migration/release records are restored unchanged from `cxline-v0.161.0.1`; their
 checkpoint status describes when they were written. Follow the active migration and maintenance
-guide for current gates. No 0.165.0 release or installation has completed yet.
+guide for current gates. `0.165.0+cxline.1` was published and installed on 2026-10-30;
+`0.165.0+cxline.2` is awaiting the final preparation commit, branch CI, release, and WSL acceptance.

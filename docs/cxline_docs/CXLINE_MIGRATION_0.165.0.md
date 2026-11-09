@@ -1,12 +1,12 @@
 # CxLine migration to Codex 0.165.0
 
-- Status: local validation complete (full run plus focused snapshot rechecks); commit/push/hosted CI pending
+- Status: `.1` published and installed; `.2` Shell UI committed; preparation commit/push/CI pending
 - Base: `rust-v0.165.0` (`360319d8dee62d87e2d59fc0c21805d79519cfed`)
 - Branch: `cxline/0.165.0`
 - Source: `cxline-v0.161.0.1` (`b8c56678d1f1c9277a58d50c615d165be3d3da9e`)
-- Planned display version: `0.165.0+cxline.1`
-- Planned release tag: `cxline-v0.165.0.1`
-- Summary: pending
+- Planned display version: `0.165.0+cxline.2`
+- Planned release tag: `cxline-v0.165.0.2`
+- Summary: pending `.2` publication and installation acceptance
 
 ## Goal
 
@@ -14,12 +14,18 @@ Reapply the accepted 0.161.0 CxLine customization on the official 0.165.0 releas
 preserving existing configuration and upstream behavior outside the customization.
 There is no intermediate 0.164 customization release.
 
+The published `.1` port is followed by a `.2` Shell UI refinement on the same upstream version
+and branch. The follow-up keeps the existing Shell recognition and command-submission behavior.
+
 ## Scope
 
 - Preserve the full CxLine configuration UI, themes, preview, persistence, and saved enable setting.
 - Preserve model/reasoning/Fast, directory, context, official usage windows, and asynchronous Git.
 - Preserve transparent composer borders, normal `❯`, Astra sparkles, and official Max/Ultra accents.
-- Keep the official status line when CxLine configuration is missing, disabled, or unusable.
+- Outside Shell mode, keep the official status line when CxLine configuration is missing,
+  disabled, or unusable.
+- In `.2`, use light-red Shell borders, prompt, and left hint with a transparent background;
+  hide contextual status only while in Shell mode and restore it on exit.
 - Keep WSL/Linux x86_64 GNU as the fork target and leave upstream workflows as reference.
 - Exclude translation, CJK cursor changes, thread deletion, new platforms, and a new master-switch UI.
 - Leave real client configuration, the installed version, daemon policy, and updater policy untouched.
@@ -38,6 +44,8 @@ There is no intermediate 0.164 customization release.
 6. Complete relevant local checks and final TUI regression, maintainer commit/push, hosted CI for
    that exact commit, tag publication, checksum verification, isolated and existing-config WSL
    acceptance, and installation/rollback handoff as separate gates.
+7. Add the `.2` Shell UI follow-up, update the build revision and version tests, and repeat the
+   final commit/CI/tag/package/installation gates for the new revision.
 
 Git writes, branch changes, commits, tags, and pushes remain maintainer actions. Pause at small
 reviewable commit checkpoints. Use the hosted tag workflow for release builds; do not start a
@@ -50,6 +58,8 @@ local release-profile build without an explicit diagnostic need.
 - Model output retains `<model> · <effort> fast` when the effective official Fast predicate is true.
 - Git probes remain bounded, asynchronous, cached, and guarded against stale cwd/request results.
 - Composer input, normal/disabled/Bash and effort-tier prompts preserve their intended appearance.
+- Shell styling uses the original light red, keeps a single left `! for shell mode` hint, reclaims
+  the hidden status row, and restores normal colors and current status on exit.
 - Targeted tests pass at each relevant checkpoint; the final candidate passes hosted branch CI
   before an immutable release tag is created. No new release or installation is implied by a port.
 
@@ -66,7 +76,7 @@ local release-profile build without an explicit diagnostic need.
 - The shared daemon is independent of the CLI. Preserve an isolated/no-daemon acceptance path and
   the previous installation; this migration does not promise to resolve upstream daemon issues.
 
-## Progress and verification
+## Initial .1 migration verification
 
 - The branch is clean at the official base before migration. Annotated tags are compared using
   their peeled commit identities, not their tag-object IDs.
@@ -291,11 +301,47 @@ CODEX_HOME="$cxline_test_home" CARGO_BUILD_JOBS=1 INSTA_UPDATE=no \
   -E 'test(/^clipboard_copy::worker::tests::right_click_paste_uses_normal_input_and_discards_stale_reads$/) | test(/^tui::windows_key_sequence::tests::mapped_shift_enter_renders_newlines_in_the_composer$/)'
 ```
 
+## Published .1 and installation
+
+`cxline-v0.165.0.1` resolves to `e224aef0b04ff7bd1255bd9ea9236b958b1aa7ee`.
+Its [branch CI](https://github.com/white795/codex/actions/runs/40985966965) and
+[release workflow](https://github.com/white795/codex/actions/runs/40993418880) passed.
+The [complete package](https://github.com/white795/codex/releases/tag/cxline-v0.165.0.1) was
+published on 2026-10-30, with archive SHA256
+`6754f5e3cb560a2d932d5ed431176bb7782733de1e23adaa8803cfc27b91bd41`.
+
+The downloaded archive matched that checksum and contained the expected GNU x86_64 manifest,
+`bin/codex`, code-mode host, `bwrap`, and `rg`. Isolated version checks passed before and after
+switching `current` to `0.165.0+cxline.1`; the 0.161.0 directory was retained for rollback.
+The initial branch push produced no CI run; the later CI-trigger commit above succeeded.
+The cause of the missing first run remains unconfirmed.
+
+## Shell UI follow-up .2
+
+The change is committed as `b5b6d7be4645611251b60fb7c23c229358db3755`.
+It reuses the existing Shell predicate and key/input handling. Shell mode uses the original
+light-red accent for the two borders, `!`, and the left-aligned `! for shell mode` hint.
+It preserves the transparent background, hides contextual status without clearing its data,
+and restores normal borders and the latest status on exit. Feedback, quit confirmation, and
+interactive transcript footers retain priority.
+
+The first layout revision passed 1,106 bottom-pane tests with snapshot updates disabled.
+After correcting the border color to match the requested light red, 37 focused Shell/style/status
+tests passed, along with strict scoped Clippy, formatting, and diff checks. Only the Shell footer
+text snapshot changed. The 1,106-case result predates the border-color correction; the final
+preparation commit still requires the full hosted branch CI gate.
+
+The build identity is now `0.165.0+cxline.2`, with matching TUI and CLI version assertions.
+Cargo/protocol compatibility remains `0.165.0`; unit-test CLI/display fixtures stay `0.0.0`.
+Revision preparation passes the three TUI version cases with `-E 'test(/^version::tests::/)'`
+and the two CLI version/help tests using the command above. Both use cached, locked, offline,
+single-job `dev-small` builds. Rust formatting, documentation links, and Bash example syntax pass.
+
 ## Next checkpoint
 
-The final local checkpoint is ready for maintainer review and commit. Suggested subject:
-`test(tui): 完成 0.165.0 CxLine 视觉适配与本地验收`.
-Push `cxline/0.165.0` and verify `cxline-ci` for that exact commit. Only a green hosted candidate
-proceeds to the planned `cxline-v0.165.0.1` tag. Publication, downloaded-package checksum/layout
-verification, isolated and existing-config WSL acceptance, and installation remain separate gates.
-Keep the installed 0.161.0 client and real configuration unchanged during development.
+Review and commit the version/documentation preparation, then push `cxline/0.165.0` once.
+Verify `cxline-ci` for that exact final commit, including both the Shell UI and revision bump,
+before creating `cxline-v0.165.0.2`. The earlier `.1` CI does not validate this new candidate.
+Release, downloaded-package verification, and actual-terminal acceptance of Shell entry/exit,
+light-red styling, left hint, and CxLine restoration remain separate gates.
+Keep the installed `.1` build available for rollback while preparing `.2`.

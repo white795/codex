@@ -3,32 +3,31 @@
 This repository keeps the upstream-compatible Codex version in Cargo metadata and adds a
 separate user-visible CxLine revision. It is intentionally maintained for WSL/Linux x86_64 only.
 
-The last accepted and locally adopted release is
-[0.161.0+cxline.1](https://github.com/white795/codex/releases/tag/cxline-v0.161.0.1), tagged at
-`b8c56678d1f1c9277a58d50c615d165be3d3da9e`. It retains the full CxLine editor, live footer,
-transparent bordered composer, and effective Fast display. The maintainer confirmed installation
-and use before beginning this migration. The archived [0.161.0 migration](CXLINE_MIGRATION_0.161.0.md)
-records development verification as of that tag, including gates that were pending when written.
+The latest published and installed release is
+[0.165.0+cxline.1](https://github.com/white795/codex/releases/tag/cxline-v0.165.0.1), tagged at
+`e224aef0b04ff7bd1255bd9ea9236b958b1aa7ee`. Its branch CI and release workflow passed, and the
+complete archive was verified and installed on 2026-10-30. The
+[0.165.0 record](CXLINE_MIGRATION_0.165.0.md) contains the release links and archive checksum.
+The archived [0.161.0 migration](CXLINE_MIGRATION_0.161.0.md) retains the previous migration's
+development checkpoints, including gates that were pending when written.
 See the earlier [0.159.2 release handoff](CXLINE_RELEASE_0.159.2.md) and
 [migration record](CXLINE_MIGRATION_0.159.2.md) for the composer/Fast refinements. The
 [0.155.1 handoff](CXLINE_RELEASE_0.155.1.md) and
 [first-release handoff](CXLINE_RELEASE_0.154.0.md) retain earlier customization decisions and
 limitations.
 
-The active migration is `cxline/0.165.0`, based on `rust-v0.165.0`
-(`360319d8dee62d87e2d59fc0c21805d79519cfed`) and targeting `0.165.0+cxline.1`.
-Local validation is complete through a full run and focused snapshot rechecks. Hosted CI,
-publication, downloaded-package verification, and local adoption are still pending.
-Read the [active migration record](CXLINE_MIGRATION_0.165.0.md) for the next
-checkpoint; do not treat restored workflows as evidence that hosted CI or release acceptance
-has completed.
+The active follow-up stays on `cxline/0.165.0`, based on `rust-v0.165.0`
+(`360319d8dee62d87e2d59fc0c21805d79519cfed`), and targets `0.165.0+cxline.2`.
+The Shell UI change is committed as `b5b6d7be4645611251b60fb7c23c229358db3755`.
+The version/documentation preparation commit, push, hosted CI for that final commit, publication,
+and installation acceptance remain the next gates in the [active record](CXLINE_MIGRATION_0.165.0.md).
 
 ## Version convention
 
 - Active upstream compatibility version: `0.165.0`
-- Planned CxLine display version: `0.165.0+cxline.1`
-- Planned release tag: `cxline-v0.165.0.1`
-- Last accepted release: `0.161.0+cxline.1` (`cxline-v0.161.0.1`)
+- Planned CxLine display version: `0.165.0+cxline.2`
+- Planned release tag: `cxline-v0.165.0.2`
+- Last published and installed release: `0.165.0+cxline.1` (`cxline-v0.165.0.1`)
 
 The release workflow rejects a tag when its upstream portion differs from
 `codex-rs/Cargo.toml`, or when the built binary does not report the matching CxLine revision.
@@ -45,24 +44,28 @@ server-compatibility or protocol inputs; the current upstream notice path distin
 
 ## Branch and CI strategy
 
-### Active migration: 0.165.0+cxline.1
+### Active follow-up: 0.165.0+cxline.2
 
-The branch starts from the new official release tag and reapplies the released
-`rust-v0.161.0..cxline-v0.161.0.1` customization delta. Foundation, full editor UI, runtime handoff,
-live footer including asynchronous Git, composer visuals, and build identity are connected.
-The WSL/Linux workflows retain the last released fork policy and use upstream's pinned Rust
-1.99.1 toolchain. Complete packages follow the current upstream layout; patched zsh is no longer
-a resource. Upstream workflows stay unchanged. Focused runtime and composer verification passes.
-Build-identity checks pass 78 TUI tests and two CLI version/help tests; all 27 existing package
-tests also pass, alongside workflow syntax, tag rejection, and fixture-based staging checks.
-Final local validation reviews 158 outer/input snapshots and ten test-source files. A full TUI
-run passes 5,960 cases and identifies two old composer snapshots; after their review/update,
-the same two tests pass with snapshot updates disabled. All 5,962 selected cases are verified
-across those runs, with four existing helper/platform skips. The initial full report remains a
-failed report; a second complete local run is not claimed. Strict scoped Clippy, non-test CLI
-checking, and formatting pass. Hosted branch CI must still run the full suite for the exact
-committed candidate before tag publication. Release packaging and manual WSL acceptance remain
-later gates in the active record.
+Shell mode uses the existing light-red accent for both composer borders, `!`, and the left-aligned
+`! for shell mode` hint, while keeping the background transparent. It temporarily hides contextual
+status and reclaims its row; exiting restores normal borders and the latest retained status.
+Transient feedback, quit confirmation, and interactive transcript footers retain priority.
+Shell recognition, key handling, and command submission keep their existing implementation.
+
+The final Shell styling passes 37 focused tests, strict scoped Clippy, and formatting checks.
+Revision preparation passes three TUI version tests and two CLI version/help tests.
+Hosted branch CI must pass for the final preparation commit before creating `cxline-v0.165.0.2`.
+After publication, install the complete archive in its own version directory and verify Shell
+entry/exit, light-red borders, the single left hint, and restoration of CxLine in the actual terminal.
+
+### Published release: 0.165.0+cxline.1
+
+The initial port reapplies `rust-v0.161.0..cxline-v0.161.0.1` onto the official 0.165.0 tag,
+preserving the full editor, live footer, asynchronous Git, composer visuals, and Fast display.
+Its successful [branch CI](https://github.com/white795/codex/actions/runs/40985966965) and
+[release workflow](https://github.com/white795/codex/actions/runs/40993418880) cover the tagged commit.
+The workflows use upstream's pinned Rust 1.99.1; complete packages follow the upstream layout
+without the retired patched zsh. Historical local verification remains in the migration record.
 
 ### Completed release: 0.159.2+cxline.2
 
@@ -105,11 +108,11 @@ diagnostic work and should run only when explicitly needed.
    tag, binary identity, Cargo version, and documentation all agree.
 2. Confirm `cxline-ci` is green for the exact commit that will receive the tag.
 3. Create an annotated `cxline-v<upstream-version>.<revision>` tag on that commit and push only the
-   new tag. Only after the exact 0.165.0 candidate passes branch CI, its planned commands are:
+   new tag. After the current HEAD, including the `.2` preparation commit, passes branch CI:
 
    ```bash
-   git tag -a cxline-v0.165.0.1 -m "Release Codex CxLine 0.165.0+cxline.1"
-   git push origin cxline-v0.165.0.1
+   git tag -a cxline-v0.165.0.2 -m "Release Codex CxLine 0.165.0+cxline.2"
+   git push origin cxline-v0.165.0.2
    ```
 
 4. Confirm the tag-triggered workflow validates the tag, builds the WSL/Linux package, and publishes
@@ -160,6 +163,9 @@ layout or bundled tools.
   tests use the source-build fixture `0.0.0`; the active production compatibility version is `0.165.0`.
 - When changing composer visuals, exercise normal, disabled, Bash, Luna Reserve, Max, and Ultra
   prompt paths. Upstream effort-tier rendering can override the normal prompt glyph.
+- For Shell UI changes, assert cell colors and transparent backgrounds as well as text snapshots.
+  Cover status-row removal, multiline/narrow input, footer priority, and restoration on mode exit;
+  a border-color correction needs focused style checks even when snapshot text is unchanged.
 - Update test extraction with the visual change: the first row is now a border, not the prompt,
   and `\n\n›` no longer delimits the composer. Check the draft or full composer frame explicitly;
   do not replace transcript/history echoes or menu selection markers. RGB comparison fixtures
@@ -197,7 +203,8 @@ For each selected stable upstream tag:
    when diagnosing packaging or when explicit pre-tag verification is desired. Verify the published
    complete archive before installing it into a new version directory.
 
-The current reusable customization range is `rust-v0.161.0..cxline-v0.161.0.1`. The earlier
+The current published customization range is `rust-v0.165.0..cxline-v0.165.0.1`. After the `.2`
+release, use `rust-v0.165.0..cxline-v0.165.0.2` to include the Shell UI follow-up. The earlier
 complete published 0.159.2 customization range is
 `rust-v0.159.2..cxline-v0.159.2.2`. The `.2` follow-up alone is
 `cxline-v0.159.2.1..cxline-v0.159.2.2`. See the release handoff for the commit sequence and lessons
@@ -209,8 +216,9 @@ Install complete archives under versioned directories:
 
 ```text
 ~/.local/opt/codex-cxline/0.161.0+cxline.1/
-~/.local/opt/codex-cxline/0.165.0+cxline.1/  # create after release/package verification
-~/.local/opt/codex-cxline/current -> 0.161.0+cxline.1/
+~/.local/opt/codex-cxline/0.165.0+cxline.1/
+~/.local/opt/codex-cxline/0.165.0+cxline.2/  # create after release/package verification
+~/.local/opt/codex-cxline/current -> 0.165.0+cxline.1/
 ~/.local/bin/codex-cxline -> ~/.local/opt/codex-cxline/current/bin/codex
 ```
 
@@ -219,9 +227,10 @@ The archive has no enclosing directory; keep `bin/`, `codex-resources/`, `codex-
 before using the existing configuration. Repoint only `current` after acceptance, and retain the
 previous version directory so rollback requires changing one symlink and starting a new process.
 
-For the pending 0.165.0 release, use a new `0.165.0+cxline.1/` directory only after downloading
-and verifying its published complete package. The existing `current` remains on the last accepted
-0.161.0 build until manual acceptance; restoring the maintenance branch does not upgrade it.
+`current` was switched to `0.165.0+cxline.1` on 2026-10-30, retaining the 0.161.0 directory.
+For the pending `.2` release, use a new `0.165.0+cxline.2/` directory after downloading and verifying
+the published complete package. Keep `.1` available for rollback, test `.2`, then repoint `current`
+and start a new process. Preparing the source revision leaves the installed `.1` build in place.
 
 Suggested interactive Bash aliases remain:
 

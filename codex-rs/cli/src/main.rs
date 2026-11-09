@@ -2835,7 +2835,7 @@ mod tests {
         assert_eq!(err.kind(), clap::error::ErrorKind::DisplayVersion);
         assert_eq!(
             err.to_string(),
-            concat!("codex-cxline ", env!("CARGO_PKG_VERSION"), "+cxline.1\n")
+            concat!("codex-cxline ", env!("CARGO_PKG_VERSION"), "+cxline.2\n")
         );
     }
 
