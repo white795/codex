@@ -11,6 +11,7 @@
 //! Only the two base composer modes opt into fresh-thread decoration; queries and help do not.
 //! Shortcut help occupies the space above the composer and keeps its close hint on the final row.
 //! Passive transcript hints retain the shortcuts entry when it fits beside the complete hint.
+//! Shell commands reserve a hint row when no transient or transcript footer owns it.
 
 use std::time::Instant;
 
@@ -277,7 +278,10 @@ impl super::ChatComposer {
     }
 
     pub(super) fn footer_hint_height(&self, width: u16, options: ComposerRenderOptions<'_>) -> u16 {
-        if self.show_warning_notice(options) || self.shortcuts_above_composer(options) {
+        if self.show_warning_notice(options)
+            || self.shortcuts_above_composer(options)
+            || (options.footer.is_none() && self.shell_mode_footer_line().is_some())
+        {
             return 1;
         }
         options
