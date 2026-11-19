@@ -2,9 +2,9 @@
 source: tui/src/chatwidget/tests/slash_commands.rs
 expression: popup
 ---
-      Delete this session?
-› As  Also deletes subagents and saved side chats. Cannot be undone.
-
+────  Delete this session?                                                  ────
+❯ As  Also deletes subagents and saved side chats. Cannot be undone.
+────                                                                        ────
   GP
     › 1. No, keep this session                     Return to the current
                                                    session

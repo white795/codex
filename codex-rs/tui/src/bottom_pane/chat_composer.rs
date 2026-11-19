@@ -16,6 +16,10 @@
 //! loss cancels the pending paste; a late clipboard result cannot overwrite newer input.
 //! The live voice strip renders after effort ignition, followed by the Astra sparkle when eligible.
 //! Owned transcripts keep persistent status below the composer and hints on a separate final row.
+//! Shell mode temporarily hides status and uses light-red borders and a left-aligned hint, yielding
+//! to transient and interactive footers without changing the retained status data.
+//! CxLine keeps the existing input geometry and transparent top/bottom rules, dim outside shell mode.
+//! Its normal prompt is `❯`; shell, Max/Ultra, and Luna Reserve retain their distinct accents.
 //! Shortcut help expands above the composer, with its close hint replacing the final shortcuts row
 //! so input and persistent status stay anchored when help opens or closes.
 //! Escape dismisses visible shortcut help before editing, transcript backtracking, or interruption.
@@ -328,7 +332,6 @@ use ratatui::style::Style;
 use ratatui::style::Stylize;
 use ratatui::text::Line;
 use ratatui::text::Span;
-use ratatui::widgets::Block;
 use ratatui::widgets::Paragraph;
 use ratatui::widgets::StatefulWidgetRef;
 use ratatui::widgets::Widget;
@@ -3707,9 +3710,14 @@ impl ChatComposer {
     }
 
     fn shell_mode_footer_line(&self) -> Option<Line<'static>> {
-        self.is_bang_shell_command()
-            .then_some(())
-            .map(|_| Line::from(vec![Span::from("Shell mode").light_red()]))
+        (self.is_bang_shell_command()
+            && matches!(
+                self.footer_mode(),
+                FooterMode::ComposerEmpty | FooterMode::ComposerHasDraft
+            )
+            && !self.footer.flash_visible()
+            && self.footer.hint_override.is_none())
+        .then(|| Line::from(vec![Span::from("! for shell mode").light_red()]))
     }
 
     /// Handles keys that mutate the textarea, including paste-burst detection.
@@ -4744,6 +4752,8 @@ impl ChatComposer {
                     input.render(inset_footer_hint_area(hint_rect), buf);
                 } else if let Some(line) = self.history_search_footer_line() {
                     render_footer_line(hint_rect, buf, line);
+                } else if let Some(line) = self.shell_mode_footer_line() {
+                    render_footer_line(hint_rect, buf, line);
                 } else {
                     let footer_props = self.hint_footer_props();
                     let show_cycle_hint = !self.popup_active()
@@ -4779,23 +4789,23 @@ impl ChatComposer {
                             show_queue_hint,
                         )
                     };
-                    let right_line =
-                        if let Some(label) = self.footer.side_conversation_context_label.as_ref() {
-                            Some(side_conversation_context_line(label))
-                        } else if let Some(line) = self.shell_mode_footer_line() {
-                            Some(line)
-                        } else if status_line_active {
-                            let full = self.mode_indicator_line(show_cycle_hint);
-                            let compact = self.mode_indicator_line(/*show_cycle_hint*/ false);
-                            let full_width = full.as_ref().map(|l| l.width() as u16).unwrap_or(0);
-                            if can_show_left_with_context(hint_rect, left_width, full_width) {
-                                full
-                            } else {
-                                compact
-                            }
+                    let right_line = if self.is_bang_shell_command() {
+                        None
+                    } else if let Some(label) = self.footer.side_conversation_context_label.as_ref()
+                    {
+                        Some(side_conversation_context_line(label))
+                    } else if status_line_active {
+                        let full = self.mode_indicator_line(show_cycle_hint);
+                        let compact = self.mode_indicator_line(/*show_cycle_hint*/ false);
+                        let full_width = full.as_ref().map(|l| l.width() as u16).unwrap_or(0);
+                        if can_show_left_with_context(hint_rect, left_width, full_width) {
+                            full
                         } else {
-                            Some(self.right_footer_line_with_context())
-                        };
+                            compact
+                        }
+                    } else {
+                        Some(self.right_footer_line_with_context())
+                    };
                     let right_width = right_line.as_ref().map(|l| l.width() as u16).unwrap_or(0);
                     let can_show_left_and_context =
                         can_show_left_with_context(hint_rect, left_width, right_width);
@@ -4849,7 +4859,27 @@ impl ChatComposer {
             selection.register(footer_rect.intersection(buf.area), changed);
         }
         let style = user_message_style();
-        Block::default().style(style).render(composer_rect, buf);
+        let border_style = if self.is_bang_shell_command() {
+            Style::default().light_red()
+        } else {
+            Style::default().dim()
+        };
+        if composer_rect.height > 0 {
+            buf.set_string(
+                composer_rect.x,
+                composer_rect.y,
+                "─".repeat(composer_rect.width as usize),
+                border_style,
+            );
+        }
+        if composer_rect.height > 1 {
+            buf.set_string(
+                composer_rect.x,
+                composer_rect.bottom() - 1,
+                "─".repeat(composer_rect.width as usize),
+                border_style,
+            );
+        }
         if let Some(previews) = options.image_previews {
             previews.render(
                 thumbnails,
@@ -4880,7 +4910,7 @@ impl ChatComposer {
                     Span::from("!").light_red().bold()
                 } else if self.luna_reserve_active {
                     // Reserve keeps one arrow at every reasoning effort; only its foreground changes.
-                    "›"
+                    "❯"
                         .fg(crate::terminal_palette::best_color((246, 197, 67)))
                         .bold()
                 } else if let Some(tier) = self.effort_tier {
@@ -4891,10 +4921,10 @@ impl ChatComposer {
                         .unwrap_or(1.0);
                     tier.prompt(charge)
                 } else {
-                    "›".bold()
+                    "❯".bold()
                 }
             } else {
-                "›".dim()
+                "❯".dim()
             };
             buf.set_span(
                 textarea_rect.x - LIVE_PREFIX_COLS,
@@ -5051,6 +5081,7 @@ mod tests {
     use super::*;
     use crate::test_support::PathBufExt;
     use crate::test_support::test_path_buf;
+    use crate::ui_consts::FOOTER_INDENT_COLS;
     use image::ImageBuffer;
     use image::Rgba;
     use pretty_assertions::assert_eq;
@@ -5093,7 +5124,117 @@ mod tests {
     }
 
     #[test]
-    fn light_terminal_palette_renders_light_composer_snapshot() {
+    fn cxline_composer_uses_transparent_borders_and_prompt_marker() {
+        let colors = crate::terminal_probe::DefaultColors {
+            fg: (0xee, 0xee, 0xee),
+            bg: (0x10, 0x10, 0x10),
+        };
+
+        crate::terminal_palette::with_test_default_colors(colors, || {
+            let (composer, _rx) = new_test_composer();
+            let area = Rect::new(
+                /*x*/ 0, /*y*/ 0, /*width*/ 40, /*height*/ 10,
+            );
+            let layout = composer.layout_with_options(area, ComposerRenderOptions::default());
+            let composer_rect = layout.composer;
+            let textarea_rect = layout.textarea;
+            let mut buffer = Buffer::empty(area);
+
+            composer.render(area, &mut buffer);
+
+            for y in [composer_rect.y, composer_rect.bottom().saturating_sub(1)] {
+                for x in composer_rect.x..composer_rect.right() {
+                    let cell = &buffer[(x, y)];
+                    assert_eq!(cell.symbol(), "─");
+                    assert_eq!(cell.bg, Color::Reset);
+                }
+            }
+            assert_eq!(
+                buffer[(textarea_rect.x - LIVE_PREFIX_COLS, textarea_rect.y)].symbol(),
+                "❯"
+            );
+        });
+    }
+
+    #[test]
+    fn cxline_composer_preserves_shell_effort_reserve_and_disabled_prompt_markers() {
+        for (effort, input_enabled, shell, reserve, expected) in [
+            (None, true, false, false, "❯"),
+            (Some(ReasoningEffort::XHigh), true, false, false, "❯"),
+            (Some(ReasoningEffort::Persistent), true, false, false, "❯"),
+            (
+                Some(ReasoningEffort::Custom("2048".to_string())),
+                true,
+                false,
+                false,
+                "❯",
+            ),
+            (Some(ReasoningEffort::Max), true, false, false, "›"),
+            (Some(ReasoningEffort::Ultra), true, false, false, "»"),
+            (Some(ReasoningEffort::Ultra), true, true, false, "!"),
+            (Some(ReasoningEffort::Max), true, false, true, "❯"),
+            (Some(ReasoningEffort::Ultra), true, false, true, "❯"),
+            (Some(ReasoningEffort::Ultra), false, false, false, "❯"),
+            (None, false, true, false, "❯"),
+        ] {
+            let (mut composer, _rx) = new_test_composer();
+            composer.set_disable_paste_burst(/*disabled*/ true);
+            composer.set_active_reasoning_effort_baseline(effort.as_ref());
+            composer.set_luna_reserve_active(reserve);
+            if shell {
+                composer.handle_key_event(KeyEvent::new(KeyCode::Char('!'), KeyModifiers::NONE));
+            }
+            composer.set_input_enabled(input_enabled, /*placeholder*/ None);
+            let area = Rect::new(0, 0, 40, 6);
+            let textarea = composer
+                .layout_with_options(area, Default::default())
+                .textarea;
+            let mut buffer = Buffer::empty(area);
+
+            composer.render(area, &mut buffer);
+
+            let prompt = &buffer[(textarea.x - LIVE_PREFIX_COLS, textarea.y)];
+            assert_eq!(prompt.symbol(), expected);
+            assert_eq!(prompt.bg, Color::Reset);
+            assert!(prompt.modifier.contains(if input_enabled {
+                Modifier::BOLD
+            } else {
+                Modifier::DIM
+            }));
+        }
+    }
+
+    #[test]
+    fn cxline_composer_borders_handle_clipped_and_offset_areas_without_changing_the_draft() {
+        for width in [0, 1, 2, 5, 40] {
+            for height in [0, 1, 2, 3, 6] {
+                let (mut composer, _rx) = new_test_composer();
+                composer.set_text_content("first\nsecond".into(), Vec::new(), Vec::new());
+                let area = Rect::new(3, 4, width, height);
+                let layout = composer.layout_with_options(area, Default::default());
+                let expected_height = composer.desired_height(width);
+                let mut buffer = Buffer::empty(area);
+
+                composer.render(area, &mut buffer);
+
+                if layout.composer.height > 0 {
+                    for y in [layout.composer.y, layout.composer.bottom() - 1] {
+                        for x in layout.composer.x..layout.composer.right() {
+                            let cell = &buffer[(x, y)];
+                            assert_eq!(cell.symbol(), "─");
+                            assert_eq!(cell.bg, Color::Reset);
+                            assert!(cell.modifier.contains(Modifier::DIM));
+                        }
+                    }
+                }
+                assert_eq!(composer.current_text(), "first\nsecond");
+                assert_eq!(composer.desired_height(width), expected_height);
+            }
+        }
+    }
+
+    #[test]
+    fn light_terminal_palette_keeps_composer_border_transparent() {
         let colors = crate::terminal_probe::DefaultColors {
             fg: (0x55, 0x57, 0x53),
             bg: (0xff, 0xff, 0xff),
@@ -5107,16 +5248,14 @@ mod tests {
             let mut buffer = Buffer::empty(area);
             composer.render(area, &mut buffer);
 
-            assert_eq!(
-                buffer[(0, 1)].bg,
-                crate::terminal_palette::rgb_color((244, 244, 244))
-            );
+            assert_eq!(buffer[(0, 0)].bg, Color::Reset);
+            assert_eq!(buffer[(0, 1)].bg, Color::Reset);
             insta::assert_snapshot!("light_terminal_palette_composer", format!("{buffer:?}"));
         });
     }
 
     #[test]
-    fn footer_hint_row_is_separated_from_composer() {
+    fn footer_hint_row_is_separated_by_composer_border() {
         let (tx, _rx) = unbounded_channel::<AppEvent>();
         let sender = AppEventSender::new(tx);
         let composer = ChatComposer::new(
@@ -5158,14 +5297,14 @@ mod tests {
 
         assert!(
             hint_row_idx > 0,
-            "expected a spacing row above the footer hints",
+            "expected a composer border above the footer hints",
         );
 
-        let spacing_row = row_to_string(hint_row_idx - 1);
+        let border_row = row_to_string(hint_row_idx - 1);
         assert_eq!(
-            spacing_row.trim(),
-            "",
-            "expected blank spacing row above hints but saw: {spacing_row:?}",
+            border_row,
+            "─".repeat(area.width as usize),
+            "expected composer border above hints but saw: {border_row:?}",
         );
     }
 
@@ -5474,6 +5613,18 @@ mod tests {
         let mut buf = Buffer::empty(area);
         composer.render(area, &mut buf);
 
+        let borders = buf
+            .content
+            .iter()
+            .filter(|cell| cell.symbol() == "─")
+            .collect::<Vec<_>>();
+        assert_eq!(borders.len(), usize::from(area.width) * 2);
+        for cell in borders {
+            assert_eq!(cell.fg, Color::LightRed);
+            assert_eq!(cell.bg, Color::Reset);
+            assert!(!cell.modifier.contains(Modifier::DIM));
+        }
+
         let prompt_cell = &buf[(0, 1)];
         assert_eq!(prompt_cell.symbol(), "!");
         assert_eq!(prompt_cell.style().fg, Some(Color::LightRed));
@@ -5483,12 +5634,23 @@ mod tests {
             .map(|x| buf[(x, footer_y)].symbol().chars().next().unwrap_or(' '))
             .collect::<String>();
         let shell_label_x = footer_text
-            .find("Shell mode")
+            .find("! for shell mode")
             .expect("expected shell mode footer label");
+        assert_eq!(shell_label_x, FOOTER_INDENT_COLS);
         assert_eq!(
             buf[(shell_label_x as u16, footer_y)].style().fg,
             Some(Color::LightRed)
         );
+
+        composer.set_text_content("!".to_string(), Vec::new(), Vec::new());
+        composer.handle_key_event(KeyEvent::new(KeyCode::Esc, KeyModifiers::NONE));
+        let mut restored = Buffer::empty(area);
+        composer.render(area, &mut restored);
+        for cell in restored.content.iter().filter(|cell| cell.symbol() == "─") {
+            assert_eq!(cell.fg, Color::Reset);
+            assert_eq!(cell.bg, Color::Reset);
+            assert!(cell.modifier.contains(Modifier::DIM));
+        }
     }
 
     fn plugin_mention_foreground_color(composer: &ChatComposer) -> Option<Color> {

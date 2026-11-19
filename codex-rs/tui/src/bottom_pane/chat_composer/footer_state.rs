@@ -11,6 +11,7 @@
 //! Only the two base composer modes opt into fresh-thread decoration; queries and help do not.
 //! Shortcut help occupies the space above the composer and keeps its close hint on the final row.
 //! Passive transcript hints retain the shortcuts entry when it fits beside the complete hint.
+//! Shell commands reserve a hint row when no transient or transcript footer owns it.
 
 use std::time::Instant;
 
@@ -96,12 +97,13 @@ pub(crate) struct ComposerRenderOptions<'a> {
 impl super::ChatComposer {
     pub(super) fn footer_props(&self) -> FooterProps {
         let mode = self.footer_mode();
+        // Generic composer snapshots use the non-WSL layout instead of host detection.
         let is_wsl = {
-            #[cfg(target_os = "linux")]
+            #[cfg(all(target_os = "linux", not(test)))]
             {
                 mode == FooterMode::ShortcutOverlay && crate::clipboard_paste::is_probably_wsl()
             }
-            #[cfg(not(target_os = "linux"))]
+            #[cfg(any(not(target_os = "linux"), test))]
             {
                 false
             }
@@ -290,7 +292,10 @@ impl super::ChatComposer {
             return 0;
         }
         // The inactive pane keeps its bottom hints row blank.
-        if options.unfocused || self.shortcuts_above_composer(options) {
+        if options.unfocused
+            || self.shortcuts_above_composer(options)
+            || (options.footer.is_none() && self.shell_mode_footer_line().is_some())
+        {
             return 1;
         }
         if let Some(hints) = self.passive_hints(options) {

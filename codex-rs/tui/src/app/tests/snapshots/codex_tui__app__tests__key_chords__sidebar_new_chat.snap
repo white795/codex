@@ -9,8 +9,8 @@ expression: frame
                                                                                │ › + New side chat
                                                                                │     Start from the main chat
                                                                                │
-                                                                               │
-› parent draft                                                                 │
-                                                                               │
+───────────────────────────────────────────────────────────────────────────────│
+❯ parent draft                                                                 │
+───────────────────────────────────────────────────────────────────────────────│
   gpt-test default                                                             │
                                                                                │ f5 g open · esc back · ↑/↓ move …

@@ -648,6 +648,101 @@ fn render_with_height(
 }
 
 #[test]
+fn shell_mode_hides_status_and_shows_left_hint_in_both_layouts() {
+    for separate_status_line in [false, true] {
+        for status_enabled in [false, true] {
+            for width in [18, 80] {
+                for draft in ["!", "!git status", "!printf x\npwd"] {
+                    let mut composer = composer();
+                    composer.set_status_line_enabled(status_enabled);
+                    composer
+                        .set_collaboration_mode_indicator(Some(CollaborationModeIndicator::Plan));
+                    composer.set_text_content(draft.to_string(), Vec::new(), Vec::new());
+                    composer.move_cursor_to_end();
+                    let options = ComposerRenderOptions {
+                        separate_status_line,
+                        ..ComposerRenderOptions::default()
+                    };
+                    let height = composer.desired_height_with_options(width, options);
+                    assert_eq!(height, draft.lines().count() as u16 + 3);
+                    let area = Rect::new(/*x*/ 3, /*y*/ 5, width, height);
+                    let mut buf = Buffer::empty(area);
+                    composer.render_with_options(area, &mut buf, /*mask_char*/ None, options);
+                    let rows = buf
+                        .content
+                        .chunks(usize::from(width))
+                        .map(|row| {
+                            row.iter()
+                                .map(ratatui::buffer::Cell::symbol)
+                                .collect::<String>()
+                        })
+                        .collect::<Vec<_>>();
+                    assert_eq!(rows.last().unwrap().trim_end(), "  ! for shell mode");
+                    assert!(
+                        !rows
+                            .iter()
+                            .any(|row| row.contains("MODEL") || row.contains("Plan mode"))
+                    );
+                    let (x, y) = composer.cursor_pos_with_options(area, options).unwrap();
+                    assert!(x >= area.x + 2 && x < area.right());
+                    assert!(y > area.y && y < area.bottom() - 2);
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn leaving_shell_mode_restores_latest_status_and_its_row() {
+    for exit_key in [KeyCode::Esc, KeyCode::Backspace] {
+        let mut composer = composer();
+        let (before, before_cursor) = render(&composer, /*width*/ 64, /*footer*/ None);
+        composer.handle_key_event(KeyEvent::new(KeyCode::Char('!'), KeyModifiers::NONE));
+        let (shell, _) = render(&composer, /*width*/ 64, /*footer*/ None);
+        assert_eq!(shell.lines().count() + 1, before.lines().count());
+        assert!(!shell.contains("MODEL"));
+
+        composer.set_status_line(Some(Line::from("UPDATED MODEL · Context 25% used").into()));
+        composer.handle_key_event(KeyEvent::new(exit_key, KeyModifiers::NONE));
+        let (after, after_cursor) = render(&composer, /*width*/ 64, /*footer*/ None);
+        assert!(after.contains("UPDATED MODEL · Context 25% used"));
+        assert!(!after.contains("! for shell mode"));
+        assert_eq!(after.lines().count(), before.lines().count());
+        assert_eq!(after_cursor, before_cursor);
+    }
+}
+
+#[test]
+fn shell_mode_keeps_transient_and_interactive_footer_priority() {
+    let mut composer = composer();
+    composer.set_text_content("!git status".to_string(), Vec::new(), Vec::new());
+    composer.show_footer_flash("Copied selection".into(), Duration::from_secs(/*secs*/ 3));
+    let (text, _) = render(&composer, /*width*/ 64, /*footer*/ None);
+    assert_eq!(text.lines().last().map(str::trim), Some("Copied selection"));
+    composer.footer.flash = None;
+
+    composer.show_quit_shortcut_hint(key_hint::ctrl(KeyCode::Char('c')), /*has_focus*/ true);
+    let (text, _) = render(&composer, /*width*/ 64, /*footer*/ None);
+    assert!(text.lines().last().unwrap().contains("quit"));
+    assert!(!text.contains("! for shell mode"));
+    composer.clear_quit_shortcut_hint(/*has_focus*/ true);
+
+    let footer = TranscriptFooter {
+        text: "Search: query".into(),
+        cursor_column: Some(8),
+        is_interactive: true,
+    };
+    let (text, cursor) = render(&composer, /*width*/ 64, Some(&footer));
+    assert_eq!(text.lines().last().map(str::trim), Some("Search: query"));
+    assert!(!text.contains("! for shell mode"));
+    assert!(!text.contains("MODEL"));
+    assert_eq!(
+        cursor.map(|(_, y)| y),
+        Some(text.lines().count() as u16 - 1)
+    );
+}
+
+#[test]
 fn passive_activity_keeps_shortcuts_only_when_the_complete_hint_fits() {
     let mut composer = composer();
     let mut line = Line::from(key_hint::key_label_spans("ctrl+o t/f4"));

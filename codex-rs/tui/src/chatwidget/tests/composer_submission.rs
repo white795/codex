@@ -36,7 +36,7 @@ async fn reconnect_queues_enter_and_resumes_ordinary_next_turn_submission() {
         .collect();
     insta::assert_snapshot!(visible.join("\n"), @r"
     ↳ queued prompt
-    › still editing
+    ❯ still editing
     ");
 
     chat.thread_stream_disconnected = false;

@@ -37,8 +37,8 @@ expression: normalize_snapshot_paths(term.backend().vt100().screen().contents())
 
 • Investigating rendering code (0s • esc to interrupt)
 
-
-› Summarize recent commits
-
+────────────────────────────────────────────────────────────────────────────────
+❯ Summarize recent commits
+────────────────────────────────────────────────────────────────────────────────
   GPT-5.6-Sol default · /tmp/project
   tab to queue message

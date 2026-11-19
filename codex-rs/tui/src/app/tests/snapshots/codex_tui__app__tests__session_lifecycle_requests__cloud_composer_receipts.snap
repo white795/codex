@@ -9,17 +9,18 @@ expression: "rendered_receipts.join(\"\\n\\n\")"
 ■ Conversation interrupted - use /feedback if something went wrong
 • Working (0s • esc to interrupt)
 
-
-› Ask Codex to do anything
-
+────────────────────────────────────────────────────────────────────────────────
+❯ Ask Codex to do anything
+────────────────────────────────────────────────────────────────────────────────
   gpt-test default · /tmp/project
   ? for shortcuts
 
 ── Steered ──
 ■ Conversation interrupted - use /feedback if something went wrong
 ■ Conversation interrupted - use /feedback if something went wrong
-› follow up
-
+────────────────────────────────────────────────────────────────────────────────
+❯ follow up
+────────────────────────────────────────────────────────────────────────────────
   gpt-test default · /tmp/project
 
 ── Unconfirmed ──
@@ -28,9 +29,9 @@ expression: "rendered_receipts.join(\"\\n\\n\")"
 • Queued follow-up inputs
   ↳ follow up
     ⇧← edit last queued message
-
-› Ask Codex to do anything
-
+────────────────────────────────────────────────────────────────────────────────
+❯ Ask Codex to do anything
+────────────────────────────────────────────────────────────────────────────────
   gpt-test default · /tmp/project
   ? for shortcuts
 
@@ -38,9 +39,9 @@ expression: "rendered_receipts.join(\"\\n\\n\")"
 ■ reply stream closed before submission
 • Working (0s • esc to interrupt)
 
-
-› follow up
-
+────────────────────────────────────────────────────────────────────────────────
+❯ follow up
+────────────────────────────────────────────────────────────────────────────────
   gpt-test default · /tmp/project
   tab to queue message
 
@@ -49,8 +50,8 @@ expression: "rendered_receipts.join(\"\\n\\n\")"
 • Queued follow-up inputs
   ↳ follow up
     ⇧← edit last queued message
-
-› Ask Codex to do anything
-
+────────────────────────────────────────────────────────────────────────────────
+❯ Ask Codex to do anything
+────────────────────────────────────────────────────────────────────────────────
   gpt-test default · /tmp/project
   ? for shortcuts

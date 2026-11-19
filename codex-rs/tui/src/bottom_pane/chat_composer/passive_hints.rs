@@ -4,6 +4,7 @@
 //! In two rows, navigation and modes stay above actions and the remaining indicators.
 //! Shorten or drop labels in collapse order. If a row still overflows, refill it
 //! in interaction priority order, then paint the surviving labels in reading order.
+//! CxLine's dedicated Shell hint owns its row instead of sharing passive indicators.
 
 use super::*;
 use crate::bottom_pane::footer::goal_status_indicator_line;
@@ -249,6 +250,7 @@ impl ChatComposer {
         let mode = self.footer_mode();
         if options.footer.is_some()
             || self.custom_footer_height().is_some()
+            || self.shell_mode_footer_line().is_some()
             || !matches!(
                 mode,
                 FooterMode::ComposerEmpty | FooterMode::ComposerHasDraft

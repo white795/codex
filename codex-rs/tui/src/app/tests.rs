@@ -35,6 +35,10 @@ mod browsing_pagination_tests;
 mod buffered_replay;
 #[path = "tests/connector_policy.rs"]
 mod connector_policy;
+#[path = "tests/cxline_git_tests.rs"]
+mod cxline_git_tests;
+#[path = "tests/cxline_overlay_tests.rs"]
+mod cxline_overlay_tests;
 #[path = "tests/disconnect_tests.rs"]
 mod disconnect;
 #[path = "tests/external_writer_fork_tests.rs"]
@@ -4531,7 +4535,7 @@ async fn handle_start_side_seeds_navigation_before_thread_started() -> Result<()
                 let buffer = tui.terminal.previous_buffer();
                 let divider = 63;
                 let row = (0..size.height)
-                    .find(|&y| buffer[(divider + 1, y)].symbol() == "›")
+                    .find(|&y| matches!(buffer[(divider + 1, y)].symbol(), "›" | "❯"))
                     .expect("right composer prompt");
                 let snapshot_row = |y| {
                     (divider - 1..=divider + 1)
@@ -5870,9 +5874,9 @@ async fn open_agent_picker_prompts_when_subagents_disabled() -> Result<()> {
 
     Box::pin(app.open_agent_picker(&mut app_server)).await;
     assert_snapshot!(render_bottom_popup(&app.chat_widget, /*width*/ 80), @r###"
-          Enable subagents?
-    › As  Subagents are disabled in this TUI session.
-
+    ────  Enable subagents?                                                     ────
+    ❯ As  Subagents are disabled in this TUI session.
+    ────                                                                        ────
       gp
         › 1. Yes, enable  Save on the server for new threads without changing
                           this thread

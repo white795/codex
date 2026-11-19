@@ -13,9 +13,9 @@ expression: normalize_snapshot_paths(screen)
 ·····  (https://example.com/doc·····
 ·····  s).                     ·····
 ·····                          ·····
-·····                          ·····
-·····› preserved draft         ·····
-·····                          ·····
+·····──────────────────────────·····
+·····❯ preserved draft         ·····
+·····──────────────────────────·····
 ·····  gpt-test default · /tmp/·····
 ·····  project                 ·····
 ····································

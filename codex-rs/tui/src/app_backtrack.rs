@@ -489,6 +489,9 @@ impl App {
         if let Some(overlay) = &mut self.overlay {
             tui.with_shortcut_hud(hud, |tui| overlay.handle_event(tui, event))?;
             if overlay.is_done() {
+                if let Some(config) = overlay.cxline_config_for_exit() {
+                    self.chat_widget.apply_cxline_editor_config(config);
+                }
                 self.close_transcript_overlay(tui);
                 tui.frame_requester().schedule_frame();
             }

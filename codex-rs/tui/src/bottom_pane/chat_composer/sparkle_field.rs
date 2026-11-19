@@ -1,7 +1,8 @@
 //! Paint the deterministic Astra starfield without owning its eligibility, timer, or redraws.
 //!
-//! Only blank, unstyled true-color cells outside protected content and the terminal cursor can be
-//! decorated. The caller supplies elapsed time and visibility to preserve the original appearance.
+//! Only blank, unstyled cells outside protected content and the terminal cursor can be decorated.
+//! Transparent cells use the terminal background for color blending without replacing their reset
+//! background. The caller supplies elapsed time and visibility to preserve the original appearance.
 
 use std::time::Duration;
 
@@ -17,12 +18,17 @@ use crate::terminal_palette::rgb_color;
 
 pub(super) const DOTS: [&str; 8] = ["⠁", "⠂", "⠄", "⠈", "⠐", "⠠", "⡀", "⢀"];
 
+pub(super) struct StarfieldColors {
+    pub foreground: (u8, u8, u8),
+    pub background: (u8, u8, u8),
+}
+
 pub(super) fn render_stars(
     area: Rect,
     cursor: Option<(u16, u16)>,
     protected_area: Option<Rect>,
     elapsed: Duration,
-    foreground: (u8, u8, u8),
+    colors: StarfieldColors,
     visibility: f32,
     buf: &mut Buffer,
 ) {
@@ -45,8 +51,10 @@ pub(super) fn render_stars(
             {
                 continue;
             }
-            let Color::Rgb(r, g, b) = cell.bg else {
-                continue;
+            let background = match cell.bg {
+                Color::Rgb(r, g, b) => (r, g, b),
+                Color::Reset => colors.background,
+                _ => continue,
             };
             let mut hash = u64::from(y - area.y) * 65537 + u64::from(x - area.x);
             hash = (hash ^ (hash >> 16)).wrapping_mul(/*rhs*/ 0x45d9f3b);
@@ -64,7 +72,7 @@ pub(super) fn render_stars(
             }
             buf[(x, y)]
                 .set_symbol(DOTS[(hash / 161 % 8) as usize])
-                .set_fg(rgb_color(blend(foreground, (r, g, b), brightness)));
+                .set_fg(rgb_color(blend(colors.foreground, background, brightness)));
         }
     }
 }

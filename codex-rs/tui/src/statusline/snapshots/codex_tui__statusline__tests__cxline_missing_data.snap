@@ -1,0 +1,9 @@
+---
+source: tui/src/statusline/foundation_tests.rs
+expression: line
+---
+Line::from_iter([
+    Span::from("⚡\u{fe0f} ").light_magenta(),
+    Span::from("- · - tokens").light_magenta(),
+])
+

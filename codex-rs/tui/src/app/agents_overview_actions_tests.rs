@@ -122,9 +122,9 @@ async fn cloud_archive_preserves_attached_child_and_other_tasks() -> Result<()> 
 
     app.confirm_agents_overview_action(parent, AgentsOverviewAction::Archive);
     insta::assert_snapshot!(render_bottom_popup(&app.chat_widget, /*width*/ 80), @"
-          Archive “Cloud parent”?
-    › Ke  This stops any running work in this task and archives it. Child
-          agents stay unchanged. Its history can be restored from the resume
+    ────  Archive “Cloud parent”?                                               ────
+    ❯ Ke  This stops any running work in this task and archives it. Child
+    ────  agents stay unchanged. Its history can be restored from the resume    ────
       gp  picker.
 
 

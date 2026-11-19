@@ -1,6 +1,7 @@
 //! Separate persistent transcript context from the composer's transient hint row.
 //! Measurement, rendering, and cursor placement share the same reserved status rectangle.
 //! Shortcut help grows above the input, preserving status and close rows below it even when clipped.
+//! Shell mode hides persistent status without clearing it, reclaiming its row until mode exit.
 
 use super::*;
 use crate::bottom_pane::footer_content::StatusLineFocus;
@@ -58,7 +59,7 @@ impl ChatComposer {
 
     pub(super) fn hint_footer_props(&self) -> FooterProps {
         let mut props = self.footer_props();
-        if props.status_line_enabled {
+        if props.status_line_enabled || self.is_bang_shell_command() {
             props.status_line_enabled = false;
             props.status_line_value = None;
             props.active_agent_label = None;
@@ -70,7 +71,7 @@ impl ChatComposer {
         &self,
         focus: StatusLineFocus,
     ) -> Option<Cow<'_, FooterContent>> {
-        if !self.footer.status_line_enabled {
+        if !self.footer.status_line_enabled || self.is_bang_shell_command() {
             return None;
         }
         let status = self.footer.status_line_value.as_ref();
